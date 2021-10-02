@@ -21,3 +21,7 @@ Key features:
 * keyboard-based filing of messages
 
 * Maybe some kind of markdown-based simple html formatter -- you write markdown, it translates to html and sends?  That would be nice.
+
+* thread on markdown format: https://softwarerecs.stackexchange.com/questions/1022/email-client-that-supports-markdown  MailMate is most directly supported case and seems to have a similar philosophy as grail..  can have option to not even translate md -> HTML and just send the raw md -- this client and perhaps others will do the right thing..
+* 
+* 
