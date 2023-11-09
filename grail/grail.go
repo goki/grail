@@ -6,7 +6,10 @@
 package grail
 
 import (
+	"net/smtp"
+
 	"goki.dev/gi/v2/gi"
+	"goki.dev/grr"
 	"goki.dev/ki/v2"
 )
 
@@ -31,4 +34,9 @@ func (app *App) ConfigWidget(sc *gi.Scene) {
 	gi.NewLabel(mail).SetText("Message goes here")
 
 	app.UpdateEndLayout(updt)
+}
+
+// SendMessage sends the current message
+func (app *App) SendMessage() {
+	grr.Log0(smtp.SendMail("smtp.gmail.com:587", nil, "test@example.com", []string{"dst@example.com"}, []byte("")))
 }
