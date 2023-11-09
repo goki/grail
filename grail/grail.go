@@ -7,12 +7,16 @@ package grail
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/ki/v2"
 )
 
 // App is an email client app.
 type App struct {
 	gi.Frame
 }
+
+// needed for interface import
+var _ ki.Ki = (*App)(nil)
 
 func (app *App) ConfigWidget(sc *gi.Scene) {
 	if app.HasChildren() {
@@ -23,7 +27,7 @@ func (app *App) ConfigWidget(sc *gi.Scene) {
 	sp := gi.NewSplits(app).SetSplits(0.3, 0.7)
 	gi.NewFrame(sp, "list")
 
-	mail := gi.NewFrame(sp, "mail")
+	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
 	gi.NewLabel(mail).SetText("Message goes here")
 
 	app.UpdateEndLayout(updt)
