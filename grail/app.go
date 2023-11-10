@@ -7,7 +7,6 @@ package grail
 
 import (
 	"github.com/emersion/go-sasl"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/grr"
@@ -19,11 +18,14 @@ import (
 type App struct {
 	gi.Frame
 
+	// Auth is the [sasl.Client] authentication for sending messages
+	Auth sasl.Client
+
 	// Message is the current message we are editing
 	Message Message
 
-	// Auth is the [sasl.Client] authentication for sending messages
-	Auth sasl.Client
+	// Messages are the messages we have fetched from the server that we can read
+	Messages []*Message
 }
 
 // needed for interface import

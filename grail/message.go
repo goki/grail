@@ -6,7 +6,6 @@ package grail
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log/slog"
 	"time"
@@ -22,13 +21,15 @@ import (
 
 // Message contains the relevant information for an email message.
 type Message struct {
-	To      []string
+	From    []*mail.Address
+	To      []*mail.Address
 	Subject string
 	Body    string
 }
 
 // Compose pulls up a dialog to send a new message
 func (a *App) Compose() { //gti:add
+	a.Message.From = []*mail.Address{{Address: gi.Prefs.User.Email}}
 	d := gi.NewDialog(a).Title("Send message").FullWindow(true)
 	giv.NewStructView(d).SetStruct(&a.Message)
 	d.OnAccept(func(e events.Event) {
@@ -40,16 +41,10 @@ func (a *App) Compose() { //gti:add
 func (a *App) SendMessage() error { //gti:add
 	var b bytes.Buffer
 
-	from := []*mail.Address{{Address: gi.Prefs.User.Email}}
-	to := make([]*mail.Address, len(a.Message.To))
-	for i, t := range a.Message.To {
-		to[i] = &mail.Address{Address: t}
-	}
-
 	var h mail.Header
 	h.SetDate(time.Now())
-	h.SetAddressList("From", from)
-	h.SetAddressList("To", to)
+	h.SetAddressList("From", a.Message.From)
+	h.SetAddressList("To", a.Message.To)
 	h.SetSubject(a.Message.Subject)
 
 	mw, err := mail.CreateWriter(&b, h)
@@ -71,11 +66,16 @@ func (a *App) SendMessage() error { //gti:add
 	w.Close()
 	tw.Close()
 
+	to := make([]string, len(a.Message.To))
+	for i, t := range a.Message.To {
+		to[i] = t.Address
+	}
+
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
 		a.Auth,
 		gi.Prefs.User.Email,
-		a.Message.To,
+		to,
 		&b,
 	)
 	if err != nil {
@@ -119,9 +119,25 @@ func (a *App) GetMessages() error { //gti:add
 		done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope}, messages)
 	}()
 
-	fmt.Println("Last 40 messages:")
+	a.Messages = make([]*Message, 0)
 	for msg := range messages {
-		fmt.Println("* " + msg.Envelope.Subject)
+
+		from := make([]*mail.Address, len(msg.Envelope.From))
+		for i, fr := range msg.Envelope.From {
+			from[i] = &mail.Address{Name: fr.PersonalName, Address: fr.Address()}
+		}
+		to := make([]*mail.Address, len(msg.Envelope.To))
+		for i, fr := range msg.Envelope.To {
+			to[i] = &mail.Address{Name: fr.PersonalName, Address: fr.Address()}
+		}
+
+		m := &Message{
+			From:    from,
+			To:      to,
+			Subject: msg.Envelope.Subject,
+			Body:    "",
+		}
+		a.Messages = append(a.Messages, m)
 	}
 
 	if err := <-done; err != nil {
