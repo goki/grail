@@ -6,8 +6,10 @@ package grail
 
 import (
 	"context"
-	"fmt"
+	"math/rand"
+	"net/http"
 	"os"
+	"strconv"
 
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
@@ -15,29 +17,37 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-var googleOauthConfig = &oauth2.Config{
-	ClientID:     os.Getenv("GRAIL_CLIENT_ID"),
-	ClientSecret: os.Getenv("GRAIL_CLIENT_SECRET"),
-	RedirectURL:  "http://127.0.0.1:3000",
-	Scopes:       []string{"https://www.googleapis.com/auth/gmail.labels"},
-	Endpoint:     google.Endpoint,
-}
-
 // AuthGmail authenticates the user with gmail.
 func (a *App) AuthGmail() error { //gti:add
 	ctx := context.Background()
+
+	b, err := os.ReadFile("../../grail/secret.json")
+	if err != nil {
+		return err
+	}
+	config, err := google.ConfigFromJSON(b, "https://mail.google.com/")
+	if err != nil {
+		return err
+	}
+	port := rand.Intn(10_000)
+	config.RedirectURL += ":" + strconv.Itoa(port)
+
+	code := make(chan string)
+	sm := http.NewServeMux()
+	sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		code <- r.URL.Query().Get("code")
+	})
+	go http.ListenAndServe(config.RedirectURL, sm)
 
 	// use PKCE to protect against CSRF attacks
 	// https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-22.html#name-countermeasures-6
 	verifier := oauth2.GenerateVerifier()
 
-	url := googleOauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
+	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
 	goosi.TheApp.OpenURL(url)
-	var code string
-	if _, err := fmt.Scan(&code); err != nil {
-		return err
-	}
-	token, err := googleOauthConfig.Exchange(ctx, code, oauth2.VerifierOption(verifier))
+
+	cs := <-code
+	token, err := config.Exchange(ctx, cs, oauth2.VerifierOption(verifier))
 	if err != nil {
 		return err
 	}
