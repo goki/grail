@@ -6,7 +6,10 @@
 package grail
 
 import (
-	"net/smtp"
+	"bytes"
+
+	"github.com/emersion/go-sasl"
+	"github.com/emersion/go-smtp"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/grr"
@@ -16,27 +19,28 @@ import (
 // App is an email client app.
 type App struct {
 	gi.Frame
+	Auth sasl.Client
 }
 
 // needed for interface import
 var _ ki.Ki = (*App)(nil)
 
-func (app *App) ConfigWidget(sc *gi.Scene) {
-	if app.HasChildren() {
+func (a *App) ConfigWidget(sc *gi.Scene) {
+	if a.HasChildren() {
 		return
 	}
-	updt := app.UpdateStart()
+	updt := a.UpdateStart()
 
-	sp := gi.NewSplits(app).SetSplits(0.3, 0.7)
+	sp := gi.NewSplits(a).SetSplits(0.3, 0.7)
 	gi.NewFrame(sp, "list")
 
 	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
 	gi.NewLabel(mail).SetText("Message goes here")
 
-	app.UpdateEndLayout(updt)
+	a.UpdateEndLayout(updt)
 }
 
 // SendMessage sends the current message
-func (app *App) SendMessage() {
-	grr.Log0(smtp.SendMail("smtp.gmail.com:587", nil, "test@example.com", []string{"dst@example.com"}, []byte("")))
+func (a *App) SendMessage() {
+	grr.Log0(smtp.SendMail("smtp.gmail.com:587", a.Auth, "test@example.com", []string{"dst@example.com"}, &bytes.Buffer{}))
 }
