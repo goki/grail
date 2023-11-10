@@ -39,12 +39,13 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := a.UpdateStart()
 
-	sp := gi.NewSplits(a).SetSplits(0.3, 0.7)
+	sp := gi.NewSplits(a)
 	gi.NewFrame(sp, "list")
 
 	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
 	gi.NewLabel(mail).SetText("Message goes here")
 
+	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
 }
 

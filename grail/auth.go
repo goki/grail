@@ -6,10 +6,12 @@ package grail
 
 import (
 	"context"
-	"fmt"
 	"os"
 
+	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/grail/xoauth2"
 	"goki.dev/grr"
 	"golang.org/x/oauth2"
@@ -20,7 +22,7 @@ var googleOauthConfig = &oauth2.Config{
 	ClientID:     os.Getenv("GRAIL_CLIENT_ID"),
 	ClientSecret: os.Getenv("GRAIL_CLIENT_SECRET"),
 	RedirectURL:  "",
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+	Scopes:       []string{"https://www.googleapis.com/auth/gmail.labels"},
 	Endpoint:     google.Endpoint,
 }
 
@@ -32,7 +34,13 @@ func (a *App) AuthGmail() error { //gti:add
 	if grr.Log0(err) != nil {
 		return err
 	}
-	fmt.Println(resp.UserCode)
+	a.EventMgr().ClipBoard().Write(mimedata.NewText(resp.UserCode))
+	cont := make(chan struct{})
+	gi.NewDialog(a).Title("Paste code").Prompt("Paste the code copied to your clipboard when prompted").Ok().
+		OnAccept(func(e events.Event) {
+			cont <- struct{}{}
+		})
+	<-cont
 	goosi.TheApp.OpenURL(resp.VerificationURI)
 	token, err := googleOauthConfig.DeviceAccessToken(ctx, resp)
 	if err != nil {
