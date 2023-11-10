@@ -6,9 +6,9 @@ package grail
 
 import (
 	"context"
+	"embed"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 
 	"goki.dev/goosi"
@@ -17,11 +17,14 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+//go:embed secret.json
+var secretJSON embed.FS
+
 // AuthGmail authenticates the user with gmail.
 func (a *App) AuthGmail() error { //gti:add
 	ctx := context.Background()
 
-	b, err := os.ReadFile("../../grail/secret.json")
+	b, err := secretJSON.ReadFile("secret.json")
 	if err != nil {
 		return err
 	}
