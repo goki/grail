@@ -7,6 +7,7 @@ package grail
 import (
 	"context"
 	"embed"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"path/filepath"
@@ -41,6 +42,10 @@ func (a *App) AuthGmail() error { //gti:add
 	err = jsons.Open(&token, tpath)
 	if err != nil {
 		return err
+	}
+
+	if gi.Prefs.User.Email == "" {
+		return fmt.Errorf("email address not specified in preferences")
 	}
 
 	a.Auth = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, token.AccessToken)

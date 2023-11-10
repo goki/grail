@@ -53,6 +53,8 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
+
+	a.AuthGmail()
 }
 
 // SendMessage sends the current message
