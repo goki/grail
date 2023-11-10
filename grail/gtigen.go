@@ -3,6 +3,7 @@
 package grail
 
 import (
+	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -16,11 +17,20 @@ var AppType = gti.AddType(&gti.Type{
 	IDName:     "app",
 	Doc:        "App is an email client app.",
 	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Username", &gti.Field{Name: "Username", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Auth", &gti.Field{Name: "Auth", Type: "github.com/emersion/go-sasl.Client", LocalType: "sasl.Client", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"AuthGmail", &gti.Method{Name: "AuthGmail", Doc: "AuthGmail authenticates the user with gmail.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+	}),
 	Instance: &App{},
 })
 
@@ -40,6 +50,18 @@ func (t *App) KiType() *gti.Type {
 // New returns a new [*App] value
 func (t *App) New() ki.Ki {
 	return &App{}
+}
+
+// SetUsername sets the [App.Username]
+func (t *App) SetUsername(v string) *App {
+	t.Username = v
+	return t
+}
+
+// SetAuth sets the [App.Auth]
+func (t *App) SetAuth(v sasl.Client) *App {
+	t.Auth = v
+	return t
 }
 
 // SetTooltip sets the [App.Tooltip]

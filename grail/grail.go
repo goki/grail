@@ -12,7 +12,9 @@ import (
 	"github.com/emersion/go-smtp"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/grr"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -25,6 +27,11 @@ type App struct {
 
 // needed for interface import
 var _ ki.Ki = (*App)(nil)
+
+func (a *App) TopAppBar(tb *gi.TopAppBar) {
+	gi.DefaultTopAppBarStd(tb)
+	giv.NewFuncButton(tb, a.AuthGmail).SetIcon(icons.Mail)
+}
 
 func (a *App) ConfigWidget(sc *gi.Scene) {
 	if a.HasChildren() {

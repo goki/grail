@@ -24,7 +24,7 @@ var googleOauthConfig = &oauth2.Config{
 }
 
 // AuthGmail authenticates the user with gmail.
-func (a *App) AuthGmail() error {
+func (a *App) AuthGmail() error { //gti:add
 	ctx := context.Background()
 
 	resp, err := googleOauthConfig.DeviceAuth(ctx)
