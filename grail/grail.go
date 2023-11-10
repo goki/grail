@@ -6,7 +6,12 @@
 package grail
 
 import (
-	"strings"
+	"bytes"
+	"fmt"
+	"io"
+	"time"
+
+	"github.com/emersion/go-message/mail"
 
 	"github.com/emersion/go-sasl"
 	"github.com/emersion/go-smtp"
@@ -52,18 +57,43 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 // SendMessage sends the current message
 func (a *App) SendMessage() error { //gti:add
-	msg := strings.NewReader(
-		"From: <koreilly5297@gmail.com>\r\n" +
-			"To: <rcoreilly5@gmail.com>\r\n" +
-			"Subject: The first message sent with Grail!\r\n" +
-			"\r\n" +
-			"This is the first message ever sent with Grail!\r\n")
-	err := smtp.SendMail(
+	var b bytes.Buffer
+
+	from := []*mail.Address{{"Kai O'Reilly", "koreilly5297@gmail.com"}}
+	to := []*mail.Address{{"Randall O'Reilly", "rcoreilly5@gmail.com"}}
+
+	var h mail.Header
+	h.SetDate(time.Now())
+	h.SetAddressList("From", from)
+	h.SetAddressList("To", to)
+	h.SetSubject("The first message sent with Grail!")
+
+	mw, err := mail.CreateWriter(&b, h)
+	if err != nil {
+		return err
+	}
+
+	tw, err := mw.CreateInline()
+	if err != nil {
+		return err
+	}
+	var th mail.InlineHeader
+	th.Set("Content-Type", "text/plain")
+	w, err := tw.CreatePart(th)
+	if err != nil {
+		return err
+	}
+	io.WriteString(w, "This is the first message ever sent with Grail!")
+	w.Close()
+	tw.Close()
+
+	fmt.Println(b.String())
+
+	return grr.Log0(smtp.SendMail(
 		"smtp.gmail.com:587",
 		a.Auth,
 		"koreilly5297@gmail.com",
 		[]string{"koreilly5297@gmail.com", "rcoreilly5@gmail.com"},
-		msg,
-	)
-	return grr.Log0(err)
+		&b,
+	))
 }

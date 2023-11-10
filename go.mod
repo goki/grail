@@ -3,6 +3,7 @@ module goki.dev/grail
 go 1.21.0
 
 require (
+	github.com/emersion/go-message v0.17.0
 	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21
 	github.com/emersion/go-smtp v0.19.0
 	goki.dev/gi/v2 v2.0.0-dev0.0.10
@@ -31,6 +32,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
+	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
