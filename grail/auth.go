@@ -18,7 +18,7 @@ import (
 var googleOauthConfig = &oauth2.Config{
 	ClientID:     os.Getenv("GRAIL_CLIENT_ID"),
 	ClientSecret: os.Getenv("GRAIL_CLIENT_SECRET"),
-	RedirectURL:  "",
+	RedirectURL:  "http://127.0.0.1:3000",
 	Scopes:       []string{"https://www.googleapis.com/auth/gmail.labels"},
 	Endpoint:     google.Endpoint,
 }
@@ -32,7 +32,6 @@ func (a *App) AuthGmail() error { //gti:add
 	verifier := oauth2.GenerateVerifier()
 
 	url := googleOauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
-	fmt.Println(url)
 	goosi.TheApp.OpenURL(url)
 	var code string
 	if _, err := fmt.Scan(&code); err != nil {
