@@ -40,19 +40,31 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	if a.HasChildren() {
 		return
 	}
+
+	grr.Log0(a.GetMail())
+
 	updt := a.UpdateStart()
 
 	sp := gi.NewSplits(a)
-	gi.NewFrame(sp, "list")
+
+	list := gi.NewFrame(sp, "list").SetLayout(gi.LayoutVert)
+	for _, msg := range a.Messages {
+		fr := gi.NewFrame(list).SetLayout(gi.LayoutVert)
+		gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject)
+		gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body)
+	}
 
 	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
 	gi.NewLabel(mail).SetText("Message goes here")
 
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
+}
 
-	err := grr.Log0(a.AuthGmail())
-	if err == nil {
-		grr.Log0(a.GetMessages())
+func (a *App) GetMail() error {
+	err := a.AuthGmail()
+	if err != nil {
+		return err
 	}
+	return a.GetMessages()
 }
