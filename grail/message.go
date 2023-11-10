@@ -114,10 +114,12 @@ func (a *App) GetMessages() error { //gti:add
 	seqset := new(imap.SeqSet)
 	seqset.AddRange(from, to)
 
+	var sect imap.BodySectionName
+
 	messages := make(chan *imap.Message, 10)
 	done := make(chan error, 1)
 	go func() {
-		done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope}, messages)
+		done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, sect.FetchItem()}, messages)
 	}()
 
 	a.Messages = make([]*Message, 0)
@@ -136,8 +138,15 @@ func (a *App) GetMessages() error { //gti:add
 			From:    from,
 			To:      to,
 			Subject: msg.Envelope.Subject,
-			Body:    "",
 		}
+
+		br := msg.GetBody(&sect)
+		b, err := io.ReadAll(br)
+		if err != nil {
+			return err
+		}
+		m.Body = string(b)
+
 		a.Messages = append(a.Messages, m)
 	}
 
