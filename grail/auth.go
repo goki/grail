@@ -6,6 +6,7 @@ package grail
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -30,14 +31,16 @@ func (a *App) AuthGmail() error { //gti:add
 		return err
 	}
 	port := rand.Intn(10_000)
-	config.RedirectURL += ":" + strconv.Itoa(port)
+	sport := ":" + strconv.Itoa(port)
+	config.RedirectURL += sport
 
 	code := make(chan string)
 	sm := http.NewServeMux()
 	sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		code <- r.URL.Query().Get("code")
+		w.Write([]byte("<h1>Authentication Successful</h1><p>You can close this browser tab and return to Grail</p>"))
 	})
-	go http.ListenAndServe(config.RedirectURL, sm)
+	go http.ListenAndServe(sport, sm)
 
 	// use PKCE to protect against CSRF attacks
 	// https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-22.html#name-countermeasures-6
@@ -51,6 +54,7 @@ func (a *App) AuthGmail() error { //gti:add
 	if err != nil {
 		return err
 	}
+	fmt.Println(token)
 
 	c := xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
 	c.Start()
