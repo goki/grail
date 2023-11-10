@@ -18,8 +18,8 @@ var AppType = gti.AddType(&gti.Type{
 	Doc:        "App is an email client app.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Username", &gti.Field{Name: "Username", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Auth", &gti.Field{Name: "Auth", Type: "github.com/emersion/go-sasl.Client", LocalType: "sasl.Client", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Message", &gti.Field{Name: "Message", Type: "goki.dev/grail/grail.Message", LocalType: "Message", Doc: "Message is the current message we are editing", Directives: gti.Directives{}, Tag: ""}},
+		{"Auth", &gti.Field{Name: "Auth", Type: "github.com/emersion/go-sasl.Client", LocalType: "sasl.Client", Doc: "Auth is the [sasl.Client] authentication for sending messages", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -30,6 +30,9 @@ var AppType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
+		{"Compose", &gti.Method{Name: "Compose", Doc: "Compose pulls up a dialog to send a new message", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SendMessage", &gti.Method{Name: "SendMessage", Doc: "SendMessage sends the current message", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -57,13 +60,15 @@ func (t *App) New() ki.Ki {
 	return &App{}
 }
 
-// SetUsername sets the [App.Username]
-func (t *App) SetUsername(v string) *App {
-	t.Username = v
+// SetMessage sets the [App.Message]:
+// Message is the current message we are editing
+func (t *App) SetMessage(v Message) *App {
+	t.Message = v
 	return t
 }
 
-// SetAuth sets the [App.Auth]
+// SetAuth sets the [App.Auth]:
+// Auth is the [sasl.Client] authentication for sending messages
 func (t *App) SetAuth(v sasl.Client) *App {
 	t.Auth = v
 	return t

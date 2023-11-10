@@ -6,16 +6,7 @@
 package grail
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"log/slog"
-	"time"
-
-	"github.com/emersion/go-message/mail"
-
 	"github.com/emersion/go-sasl"
-	"github.com/emersion/go-smtp"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -26,8 +17,12 @@ import (
 // App is an email client app.
 type App struct {
 	gi.Frame
-	Username string
-	Auth     sasl.Client
+
+	// Message is the current message we are editing
+	Message Message
+
+	// Auth is the [sasl.Client] authentication for sending messages
+	Auth sasl.Client
 }
 
 // needed for interface import
@@ -35,8 +30,7 @@ var _ ki.Ki = (*App)(nil)
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
-	giv.NewFuncButton(tb, a.AuthGmail).SetIcon(icons.Mail)
-	giv.NewFuncButton(tb, a.SendMessage).SetIcon(icons.Send)
+	giv.NewFuncButton(tb, a.Compose).SetIcon(icons.Send)
 }
 
 func (a *App) ConfigWidget(sc *gi.Scene) {
@@ -55,52 +49,4 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	a.UpdateEndLayout(updt)
 
 	a.AuthGmail()
-}
-
-// SendMessage sends the current message
-func (a *App) SendMessage() error { //gti:add
-	var b bytes.Buffer
-
-	from := []*mail.Address{{"Kai O'Reilly", "koreilly5297@gmail.com"}}
-	to := []*mail.Address{{"Randall O'Reilly", "rcoreilly5@gmail.com"}}
-
-	var h mail.Header
-	h.SetDate(time.Now())
-	h.SetAddressList("From", from)
-	h.SetAddressList("To", to)
-	h.SetSubject("The first message sent with Grail!")
-
-	mw, err := mail.CreateWriter(&b, h)
-	if err != nil {
-		return err
-	}
-
-	tw, err := mw.CreateInline()
-	if err != nil {
-		return err
-	}
-	var th mail.InlineHeader
-	th.Set("Content-Type", "text/plain")
-	w, err := tw.CreatePart(th)
-	if err != nil {
-		return err
-	}
-	io.WriteString(w, "This is the first message ever sent with Grail!")
-	w.Close()
-	tw.Close()
-
-	fmt.Println(b.String())
-
-	err = smtp.SendMail(
-		"smtp.googlemail.com:587",
-		a.Auth,
-		"koreilly5297@gmail.com",
-		[]string{"koreilly5297@gmail.com", "rcoreilly5@gmail.com"},
-		&b,
-	)
-	if err != nil {
-		se := err.(*smtp.SMTPError)
-		slog.Error("SMTP error", "code", se.Code, "enhancedCode", se.EnhancedCode, "message", se.Message)
-	}
-	return err
 }
