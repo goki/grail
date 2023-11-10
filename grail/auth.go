@@ -9,10 +9,12 @@ import (
 	"embed"
 	"math/rand"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
+	"goki.dev/grows/jsons"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -54,6 +56,13 @@ func (a *App) AuthGmail() error { //gti:add
 
 	cs := <-code
 	token, err := config.Exchange(ctx, cs, oauth2.VerifierOption(verifier))
+	if err != nil {
+		return err
+	}
+
+	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "token.json")
+	// TODO(kai/grail): figure out a more secure way to save the token
+	err = jsons.Save(token, tpath)
 	if err != nil {
 		return err
 	}
