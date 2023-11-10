@@ -11,6 +11,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/emersion/go-imap"
+	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-smtp"
 	"goki.dev/gi/v2/gi"
@@ -69,8 +71,6 @@ func (a *App) SendMessage() error { //gti:add
 	w.Close()
 	tw.Close()
 
-	fmt.Println(b.String())
-
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
 		a.Auth,
@@ -83,4 +83,49 @@ func (a *App) SendMessage() error { //gti:add
 		slog.Error("error sending message: SMTP error:", "code", se.Code, "enhancedCode", se.EnhancedCode, "message", se.Message)
 	}
 	return err
+}
+
+// GetMessages fetches the messages from the server
+func (a *App) GetMessages() error { //gti:add
+	c, err := client.DialTLS("imap.gmail.com:993", nil)
+	if err != nil {
+		return err
+	}
+	defer c.Logout()
+
+	err = c.Authenticate(a.Auth)
+	if err != nil {
+		return err
+	}
+
+	ibox, err := c.Select("INBOX", false)
+	if err != nil {
+		return err
+	}
+
+	// Get the last 40 messages
+	from := uint32(1)
+	to := ibox.Messages
+	if ibox.Messages > 39 {
+		// We're using unsigned integers here, only subtract if the result is > 0
+		from = ibox.Messages - 39
+	}
+	seqset := new(imap.SeqSet)
+	seqset.AddRange(from, to)
+
+	messages := make(chan *imap.Message, 10)
+	done := make(chan error, 1)
+	go func() {
+		done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope}, messages)
+	}()
+
+	fmt.Println("Last 40 messages:")
+	for msg := range messages {
+		fmt.Println("* " + msg.Envelope.Subject)
+	}
+
+	if err := <-done; err != nil {
+		return err
+	}
+	return nil
 }

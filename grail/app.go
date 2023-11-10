@@ -10,6 +10,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -48,5 +49,8 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
 
-	a.AuthGmail()
+	err := grr.Log0(a.AuthGmail())
+	if err == nil {
+		grr.Log0(a.GetMessages())
+	}
 }
