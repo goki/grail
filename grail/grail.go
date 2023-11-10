@@ -31,6 +31,7 @@ var _ ki.Ki = (*App)(nil)
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
 	giv.NewFuncButton(tb, a.AuthGmail).SetIcon(icons.Mail)
+	giv.NewFuncButton(tb, a.SendMessage).SetIcon(icons.Send)
 }
 
 func (a *App) ConfigWidget(sc *gi.Scene) {
@@ -50,6 +51,17 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 }
 
 // SendMessage sends the current message
-func (a *App) SendMessage() {
-	grr.Log0(smtp.SendMail("smtp.gmail.com:587", a.Auth, "test@example.com", []string{"dst@example.com"}, &bytes.Buffer{}))
+func (a *App) SendMessage() { //gti:add
+	buf := bytes.NewBufferString(
+		"To: rcoreilly5@gmail.com\r\n" +
+			"Subject: The first message sent with Grail!\r\n" +
+			"\r\n" +
+			"This is the first message ever sent with Grail!\r\n")
+	grr.Log0(smtp.SendMail(
+		"smtp.gmail.com:587",
+		a.Auth,
+		"koreilly5297@gmail.com",
+		[]string{"koreilly5297@gmail.com", "rcoreilly5@gmail.com"},
+		buf,
+	))
 }

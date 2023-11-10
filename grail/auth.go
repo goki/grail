@@ -6,7 +6,6 @@ package grail
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -40,6 +39,7 @@ func (a *App) AuthGmail() error { //gti:add
 		code <- r.URL.Query().Get("code")
 		w.Write([]byte("<h1>Authentication Successful</h1><p>You can close this browser tab and return to Grail</p>"))
 	})
+	// TODO(kai/grail): more graceful closing / error handling
 	go http.ListenAndServe(sport, sm)
 
 	// use PKCE to protect against CSRF attacks
@@ -54,9 +54,8 @@ func (a *App) AuthGmail() error { //gti:add
 	if err != nil {
 		return err
 	}
-	fmt.Println(token)
 
-	c := xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
-	c.Start()
+	a.Auth = xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
+
 	return nil
 }
