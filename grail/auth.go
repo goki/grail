@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
+	"goki.dev/grr"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -19,7 +20,7 @@ var googleOauthConfig = &oauth2.Config{
 	ClientID:     os.Getenv("GRAIL_CLIENT_ID"),
 	ClientSecret: os.Getenv("GRAIL_CLIENT_SECRET"),
 	RedirectURL:  "",
-	Scopes:       []string{"https://mail.google.com/"},
+	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 	Endpoint:     google.Endpoint,
 }
 
@@ -28,7 +29,7 @@ func (a *App) AuthGmail() error { //gti:add
 	ctx := context.Background()
 
 	resp, err := googleOauthConfig.DeviceAuth(ctx)
-	if err != nil {
+	if grr.Log0(err) != nil {
 		return err
 	}
 	fmt.Println(resp.UserCode)
