@@ -10,9 +10,12 @@ require (
 	goki.dev/gti v0.1.15
 	goki.dev/ki/v2 v2.0.0-dev0.0.18
 	goki.dev/ordmap v0.5.6
+	golang.org/x/oauth2 v0.14.0
 )
 
 require (
+	cloud.google.com/go/compute v1.20.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/BurntSushi/freetype-go v0.0.0-20160129220410-b763ddbfe298 // indirect
 	github.com/BurntSushi/graphics-go v0.0.0-20160129215708-b43f31a4a966 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
@@ -33,6 +36,7 @@ require (
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/goki/go-difflib v1.2.1 // indirect
 	github.com/goki/vulkan v1.0.7 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
@@ -63,8 +67,10 @@ require (
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.14 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )

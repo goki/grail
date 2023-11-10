@@ -19,7 +19,8 @@ import (
 // App is an email client app.
 type App struct {
 	gi.Frame
-	Auth sasl.Client
+	Username string
+	Auth     sasl.Client
 }
 
 // needed for interface import
