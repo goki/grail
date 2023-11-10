@@ -53,8 +53,8 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 // SendMessage sends the current message
 func (a *App) SendMessage() error { //gti:add
 	msg := strings.NewReader(
-		"From: koreilly5297@gmail.com\r\n" +
-			"To: rcoreilly5@gmail.com\r\n" +
+		"From: <koreilly5297@gmail.com>\r\n" +
+			"To: <rcoreilly5@gmail.com>\r\n" +
 			"Subject: The first message sent with Grail!\r\n" +
 			"\r\n" +
 			"This is the first message ever sent with Grail!\r\n")
