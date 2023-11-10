@@ -6,6 +6,7 @@ require (
 	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21
 	github.com/emersion/go-smtp v0.19.0
 	goki.dev/gi/v2 v2.0.0-dev0.0.10
+	goki.dev/goosi v0.0.10
 	goki.dev/grr v0.0.5
 	goki.dev/gti v0.1.15
 	goki.dev/ki/v2 v2.0.0-dev0.0.18
@@ -54,7 +55,6 @@ require (
 	goki.dev/enums v0.9.37 // indirect
 	goki.dev/girl v0.0.18 // indirect
 	goki.dev/glop v0.1.4 // indirect
-	goki.dev/goosi v0.0.10 // indirect
 	goki.dev/grog v0.0.12 // indirect
 	goki.dev/grows v0.3.14 // indirect
 	goki.dev/icons v0.0.8 // indirect

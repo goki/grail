@@ -5,8 +5,11 @@
 package grail
 
 import (
+	"context"
+	"fmt"
 	"os"
 
+	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -22,7 +25,20 @@ var googleOauthConfig = &oauth2.Config{
 
 // AuthGmail authenticates the user with gmail.
 func (a *App) AuthGmail() error {
-	c := xoauth2.NewXoauth2Client(a.Username, "")
+	ctx := context.Background()
+
+	resp, err := googleOauthConfig.DeviceAuth(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println(resp.UserCode)
+	goosi.TheApp.OpenURL(resp.VerificationURI)
+	token, err := googleOauthConfig.DeviceAccessToken(ctx, resp)
+	if err != nil {
+		return err
+	}
+
+	c := xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
 	c.Start()
 	return nil
 }
