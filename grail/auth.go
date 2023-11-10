@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"goki.dev/gi/v2/gi"
+	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
 	"goki.dev/grows/jsons"
@@ -24,6 +26,31 @@ var secretJSON embed.FS
 
 // AuthGmail authenticates the user with gmail.
 func (a *App) AuthGmail() error { //gti:add
+	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
+	exists, err := dirs.FileExists(tpath)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		err := a.GetGmailRefreshToken()
+		if err != nil {
+			return err
+		}
+	}
+	var token oauth2.Token
+	err = jsons.Open(&token, tpath)
+	if err != nil {
+		return err
+	}
+
+	a.Auth = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, token.AccessToken)
+
+	return nil
+}
+
+// GetGmailRefreshToken uses the Google Oauth2 system to get and save a long-lived
+// refresh token for the user that grants access to the gmail SMTP and IMAP servers.
+func (a *App) GetGmailRefreshToken() error {
 	ctx := context.Background()
 
 	b, err := secretJSON.ReadFile("secret.json")
@@ -60,15 +87,11 @@ func (a *App) AuthGmail() error { //gti:add
 		return err
 	}
 
-	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "token.json")
+	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
 	// TODO(kai/grail): figure out a more secure way to save the token
 	err = jsons.Save(token, tpath)
 	if err != nil {
 		return err
 	}
-
-	a.Username = "koreilly5297@gmail.com"
-	a.Auth = xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
-
 	return nil
 }
