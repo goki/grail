@@ -27,11 +27,11 @@ type Message struct {
 
 // Compose pulls up a dialog to send a new message
 func (a *App) Compose() { //gti:add
-	d := gi.NewDialog(a).Title("Send message")
+	d := gi.NewDialog(a).Title("Send message").FullWindow(true)
 	giv.NewStructView(d).SetStruct(&a.Message)
 	d.OnAccept(func(e events.Event) {
 		a.SendMessage()
-	}).Cancel().Ok().Run()
+	}).Cancel().Ok("Send").Run()
 }
 
 // SendMessage sends the current message
