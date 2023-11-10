@@ -7,8 +7,12 @@ package grail
 
 import (
 	"github.com/emersion/go-sasl"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -21,8 +25,11 @@ type App struct {
 	// Auth is the [sasl.Client] authentication for sending messages
 	Auth sasl.Client
 
-	// Message is the current message we are editing
-	Message Message
+	// ComposeMessage is the current message we are editing
+	ComposeMessage *Message
+
+	// ReadMessage is the current message we are reading
+	ReadMessage *Message
 
 	// Messages are the messages we have fetched from the server that we can read
 	Messages []*Message
@@ -47,15 +54,36 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp := gi.NewSplits(a)
 
+	var msv *giv.StructView
+
 	list := gi.NewFrame(sp, "list").SetLayout(gi.LayoutVert)
 	for _, msg := range a.Messages {
+		msg := msg
 		fr := gi.NewFrame(list).SetLayout(gi.LayoutVert)
-		gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject)
-		gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body)
+
+		fr.Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
+			s.Cursor = cursors.Pointer
+		})
+		fr.OnClick(func(e events.Event) {
+			a.ReadMessage = msg
+			msv.SetStruct(a.ReadMessage)
+		})
+
+		gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+			})
+		gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+			})
 	}
 
 	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
-	gi.NewLabel(mail).SetText("Message goes here")
+	msv = giv.NewStructView(mail).SetStruct(a.ReadMessage)
 
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)

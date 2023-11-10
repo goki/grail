@@ -29,9 +29,10 @@ type Message struct {
 
 // Compose pulls up a dialog to send a new message
 func (a *App) Compose() { //gti:add
-	a.Message.From = []*mail.Address{{Address: gi.Prefs.User.Email}}
+	a.ComposeMessage = &Message{}
+	a.ComposeMessage.From = []*mail.Address{{Address: gi.Prefs.User.Email}}
 	d := gi.NewDialog(a).Title("Send message").FullWindow(true)
-	giv.NewStructView(d).SetStruct(&a.Message)
+	giv.NewStructView(d).SetStruct(a.ComposeMessage)
 	d.OnAccept(func(e events.Event) {
 		a.SendMessage()
 	}).Cancel().Ok("Send").Run()
@@ -43,9 +44,9 @@ func (a *App) SendMessage() error { //gti:add
 
 	var h mail.Header
 	h.SetDate(time.Now())
-	h.SetAddressList("From", a.Message.From)
-	h.SetAddressList("To", a.Message.To)
-	h.SetSubject(a.Message.Subject)
+	h.SetAddressList("From", a.ComposeMessage.From)
+	h.SetAddressList("To", a.ComposeMessage.To)
+	h.SetSubject(a.ComposeMessage.Subject)
 
 	mw, err := mail.CreateWriter(&b, h)
 	if err != nil {
@@ -62,12 +63,12 @@ func (a *App) SendMessage() error { //gti:add
 	if err != nil {
 		return err
 	}
-	io.WriteString(w, a.Message.Body)
+	io.WriteString(w, a.ComposeMessage.Body)
 	w.Close()
 	tw.Close()
 
-	to := make([]string, len(a.Message.To))
-	for i, t := range a.Message.To {
+	to := make([]string, len(a.ComposeMessage.To))
+	for i, t := range a.ComposeMessage.To {
 		to[i] = t.Address
 	}
 
