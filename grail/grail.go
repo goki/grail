@@ -65,15 +65,10 @@ func (a *App) SendMessage() error { //gti:add
 	var h mail.Header
 	h.SetDate(time.Now())
 	h.SetAddressList("From", from)
+	h.SetSubject("Subject")
 	h.SetAddressList("To", to)
-	h.SetSubject("The first message sent with Grail!")
 
-	mw, err := mail.CreateWriter(&b, h)
-	if err != nil {
-		return err
-	}
-
-	tw, err := mw.CreateInline()
+	tw, err := mail.CreateInlineWriter(&b, h)
 	if err != nil {
 		return err
 	}
@@ -83,14 +78,14 @@ func (a *App) SendMessage() error { //gti:add
 	if err != nil {
 		return err
 	}
-	io.WriteString(w, "This is the first message ever sent with Grail!")
+	io.WriteString(w, "Body")
 	w.Close()
 	tw.Close()
 
 	fmt.Println(b.String())
 
 	return grr.Log0(smtp.SendMail(
-		"smtp.gmail.com:587",
+		"smtp.googlemail.com:587",
 		a.Auth,
 		"koreilly5297@gmail.com",
 		[]string{"koreilly5297@gmail.com", "rcoreilly5@gmail.com"},
