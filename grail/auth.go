@@ -6,14 +6,11 @@ package grail
 
 import (
 	"context"
+	"fmt"
 	"os"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
 	"goki.dev/grail/xoauth2"
-	"goki.dev/grr"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -30,19 +27,18 @@ var googleOauthConfig = &oauth2.Config{
 func (a *App) AuthGmail() error { //gti:add
 	ctx := context.Background()
 
-	resp, err := googleOauthConfig.DeviceAuth(ctx)
-	if grr.Log0(err) != nil {
+	// use PKCE to protect against CSRF attacks
+	// https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-22.html#name-countermeasures-6
+	verifier := oauth2.GenerateVerifier()
+
+	url := googleOauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
+	fmt.Println(url)
+	goosi.TheApp.OpenURL(url)
+	var code string
+	if _, err := fmt.Scan(&code); err != nil {
 		return err
 	}
-	a.EventMgr().ClipBoard().Write(mimedata.NewText(resp.UserCode))
-	cont := make(chan struct{})
-	gi.NewDialog(a).Title("Paste code").Prompt("Paste the code copied to your clipboard when prompted").Ok().
-		OnAccept(func(e events.Event) {
-			cont <- struct{}{}
-		})
-	<-cont
-	goosi.TheApp.OpenURL(resp.VerificationURI)
-	token, err := googleOauthConfig.DeviceAccessToken(ctx, resp)
+	token, err := googleOauthConfig.Exchange(ctx, code, oauth2.VerifierOption(verifier))
 	if err != nil {
 		return err
 	}
