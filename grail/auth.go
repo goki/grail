@@ -55,6 +55,7 @@ func (a *App) AuthGmail() error { //gti:add
 		return err
 	}
 
+	a.Username = "koreilly5297@gmail.com"
 	a.Auth = xoauth2.NewXoauth2Client(a.Username, token.AccessToken)
 
 	return nil

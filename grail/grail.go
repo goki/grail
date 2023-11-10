@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/emersion/go-message/mail"
@@ -18,7 +19,6 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -65,10 +65,15 @@ func (a *App) SendMessage() error { //gti:add
 	var h mail.Header
 	h.SetDate(time.Now())
 	h.SetAddressList("From", from)
-	h.SetSubject("Subject")
 	h.SetAddressList("To", to)
+	h.SetSubject("The first message sent with Grail!")
 
-	tw, err := mail.CreateInlineWriter(&b, h)
+	mw, err := mail.CreateWriter(&b, h)
+	if err != nil {
+		return err
+	}
+
+	tw, err := mw.CreateInline()
 	if err != nil {
 		return err
 	}
@@ -78,17 +83,22 @@ func (a *App) SendMessage() error { //gti:add
 	if err != nil {
 		return err
 	}
-	io.WriteString(w, "Body")
+	io.WriteString(w, "This is the first message ever sent with Grail!")
 	w.Close()
 	tw.Close()
 
 	fmt.Println(b.String())
 
-	return grr.Log0(smtp.SendMail(
+	err = smtp.SendMail(
 		"smtp.googlemail.com:587",
 		a.Auth,
 		"koreilly5297@gmail.com",
 		[]string{"koreilly5297@gmail.com", "rcoreilly5@gmail.com"},
 		&b,
-	))
+	)
+	if err != nil {
+		se := err.(*smtp.SMTPError)
+		slog.Error("SMTP error", "code", se.Code, "enhancedCode", se.EnhancedCode, "message", se.Message)
+	}
+	return err
 }
