@@ -17,6 +17,7 @@ require (
 	goki.dev/gti v0.1.15
 	goki.dev/icons v0.0.8
 	goki.dev/ki/v2 v2.0.0-dev0.0.18
+	goki.dev/mat32/v2 v2.0.0-dev0.0.12
 	goki.dev/ordmap v0.5.6
 	golang.org/x/oauth2 v0.14.0
 )
@@ -62,7 +63,6 @@ require (
 	goki.dev/enums v0.9.37 // indirect
 	goki.dev/grog v0.0.12 // indirect
 	goki.dev/laser v0.1.17 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.12 // indirect
 	goki.dev/pi/v2 v2.0.0-dev0.0.11 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.4 // indirect
 	goki.dev/svg v0.1.13 // indirect
