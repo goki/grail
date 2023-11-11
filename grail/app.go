@@ -16,6 +16,7 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // App is an email client app.
@@ -56,10 +57,14 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	var msv *giv.StructView
 
-	list := gi.NewFrame(sp, "list").SetLayout(gi.LayoutVert)
+	list := gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+	})
 	for _, msg := range a.Messages {
 		msg := msg
-		fr := gi.NewFrame(list).SetLayout(gi.LayoutVert)
+		fr := gi.NewFrame(list).Style(func(s *styles.Style) {
+			s.MainAxis = mat32.Y
+		})
 
 		fr.Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
@@ -82,7 +87,9 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 			})
 	}
 
-	mail := gi.NewFrame(sp, "mail").SetLayout(gi.LayoutVert)
+	mail := gi.NewFrame(sp, "mail").Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+	})
 	msv = giv.NewStructView(mail).SetStruct(a.ReadMessage)
 
 	sp.SetSplits(0.3, 0.7)
