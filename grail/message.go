@@ -24,7 +24,7 @@ type Message struct {
 	From    []*mail.Address
 	To      []*mail.Address
 	Subject string
-	Body    string
+	Body    string `view:"text-editor"`
 }
 
 // Compose pulls up a dialog to send a new message
