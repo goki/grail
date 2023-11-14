@@ -4,9 +4,9 @@ package grail
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.0"
+	Version = "v0.0.1"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "e6e767f"
+	GitCommit = "256d991"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-11-14 15:49"
+	VersionDate = "2023-11-14 16:01"
 )
