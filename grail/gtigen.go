@@ -70,7 +70,7 @@ func (t *App) New() ki.Ki {
 // SetAuth sets the [App.Auth]:
 // Auth is the [sasl.Client] authentication for sending messages
 func (t *App) SetAuth(v sasl.Client) *App {
-	t.Auth = v
+	t.AuthClient = v
 	return t
 }
 

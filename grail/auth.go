@@ -5,39 +5,36 @@
 package grail
 
 import (
-	"context"
-	"embed"
 	"fmt"
-	"net/http"
 	"path/filepath"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
 	"goki.dev/grows/jsons"
+	"goki.dev/kid"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
-//go:embed secret.json
-var secretJSON embed.FS
-
-// AuthGmail authenticates the user with gmail.
-func (a *App) AuthGmail() error { //gti:add
+// Auth authorizes access to the user's mail and sets [App.AuthClient].
+// If the user does not already have a saved auth token, it calls [SignIn].
+func (a *App) Auth() error {
 	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
 	exists, err := dirs.FileExists(tpath)
 	if err != nil {
 		return err
 	}
+
 	if !exists {
-		err := a.GetGmailRefreshToken()
+		err := a.SignIn()
 		if err != nil {
 			return err
 		}
 	}
-	var token oauth2.Token
-	err = jsons.Open(&token, tpath)
+
+	err = jsons.Open(&a.AuthToken, tpath)
 	if err != nil {
 		return err
 	}
@@ -46,7 +43,35 @@ func (a *App) AuthGmail() error { //gti:add
 		return fmt.Errorf("email address not specified in preferences")
 	}
 
-	a.Auth = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, token.AccessToken)
+	a.AuthClient = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, a.AuthToken.AccessToken)
+	return nil
+}
+
+// SignIn displays a dialog for the user to sign in with the platform of their choice.
+func (a *App) SignIn() error {
+	d := gi.NewBody().AddTitle("Sign in")
+	ec := make(chan error)
+	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
+		tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
+		// TODO(kai/grail): figure out a more secure way to save the token
+		err := jsons.Save(token, tpath)
+		ec <- err
+	}
+	kid.Buttons(d, fun, "https://mail.google.com/")
+	d.NewDialog(a).Run()
+	return <-ec
+}
+
+/*
+// AuthGmail authenticates the user with gmail.
+func (a *App) AuthGmail() error { //gti:add
+
+	if !exists {
+		err := a.GetGmailRefreshToken()
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -89,11 +114,6 @@ func (a *App) GetGmailRefreshToken() error {
 		return err
 	}
 
-	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
-	// TODO(kai/grail): figure out a more secure way to save the token
-	err = jsons.Save(token, tpath)
-	if err != nil {
-		return err
-	}
 	return nil
 }
+*/

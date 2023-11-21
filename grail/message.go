@@ -78,7 +78,7 @@ func (a *App) SendMessage() error { //gti:add
 
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
-		a.Auth,
+		a.AuthClient,
 		gi.Prefs.User.Email,
 		to,
 		&b,
@@ -98,7 +98,7 @@ func (a *App) GetMessages() error { //gti:add
 	}
 	defer c.Logout()
 
-	err = c.Authenticate(a.Auth)
+	err = c.Authenticate(a.AuthClient)
 	if err != nil {
 		return err
 	}

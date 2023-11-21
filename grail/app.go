@@ -16,14 +16,18 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"golang.org/x/oauth2"
 )
 
 // App is an email client app.
 type App struct {
 	gi.Frame
 
-	// Auth is the [sasl.Client] authentication for sending messages
-	Auth sasl.Client
+	// AuthToken is [oauth2.Token] for the signed in user.
+	AuthToken oauth2.Token
+
+	// AuthClient is the [sasl.Client] authentication for sending messages
+	AuthClient sasl.Client
 
 	// ComposeMessage is the current message we are editing
 	ComposeMessage *Message
@@ -48,7 +52,10 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 
-	grr.Log0(a.GetMail())
+	err := a.GetMail()
+	if grr.Log0(err) != nil {
+		gi.ErrorDialog(a, err, "Error getting mail").Run()
+	}
 
 	updt := a.UpdateStart()
 
@@ -96,7 +103,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 }
 
 func (a *App) GetMail() error {
-	err := a.AuthGmail()
+	err := a.Auth()
 	if err != nil {
 		return err
 	}
