@@ -24,7 +24,10 @@ type Message struct {
 	From    []*mail.Address `view:"inline"`
 	To      []*mail.Address `view:"inline"`
 	Subject string
-	Body    string `view:"text-editor"`
+	// only for sending
+	Body string `view:"text-editor" viewif:"BodyReader==nil"`
+	// only for receiving
+	BodyReader io.Reader `view:"-"`
 }
 
 // Compose pulls up a dialog to send a new message
@@ -139,18 +142,11 @@ func (a *App) GetMessages() error { //gti:add
 		}
 
 		m := &Message{
-			From:    from,
-			To:      to,
-			Subject: msg.Envelope.Subject,
+			From:       from,
+			To:         to,
+			Subject:    msg.Envelope.Subject,
+			BodyReader: msg.GetBody(&sect),
 		}
-
-		br := msg.GetBody(&sect)
-		b, err := io.ReadAll(br)
-		if err != nil {
-			return err
-		}
-		m.Body = string(b)
-
 		a.Messages = append(a.Messages, m)
 	}
 
