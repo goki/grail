@@ -31,11 +31,15 @@ type Message struct {
 func (a *App) Compose() { //gti:add
 	a.ComposeMessage = &Message{}
 	a.ComposeMessage.From = []*mail.Address{{Address: gi.Prefs.User.Email}}
-	d := gi.NewDialog(a).Title("Send message").FullWindow(true)
-	giv.NewStructView(d).SetStruct(a.ComposeMessage)
-	d.OnAccept(func(e events.Event) {
-		a.SendMessage()
-	}).Cancel().Ok("Send").Run()
+	b := gi.NewBody().AddTitle("Send message")
+	giv.NewStructView(b).SetStruct(a.ComposeMessage)
+	b.AddBottomBar(func(pw gi.Widget) {
+		b.AddCancel(pw)
+		b.AddOk(pw).SetText("Send").OnClick(func(e events.Event) {
+			a.SendMessage()
+		})
+	})
+	b.NewFullDialog(a).Run()
 }
 
 // SendMessage sends the current message

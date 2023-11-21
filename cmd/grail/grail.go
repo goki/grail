@@ -14,8 +14,10 @@ func main() { gimain.Run(app) }
 
 func app() {
 	gi.SetAppName("grail")
-	sc := gi.NewScene("grail").SetTitle("Grail")
-	app := grail.NewApp(sc, "app")
-	gi.DefaultTopAppBar = app.TopAppBar
-	gi.NewWindow(sc).Run().Wait()
+	b := gi.NewBody().SetTitle("Grail")
+	app := grail.NewApp(b, "app")
+	b.AddTopBar(func(pw gi.Widget) {
+		app.TopAppBar(b.TopAppBar(pw))
+	})
+	b.NewWindow().Run().Wait()
 }
