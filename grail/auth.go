@@ -61,7 +61,15 @@ func (a *App) SignIn() error {
 		d.Close()
 		ec <- err
 	}
-	kid.Buttons(d, fun, "https://mail.google.com/")
+	kid.Buttons(d, &kid.ButtonsConfig{
+		SuccessFunc: fun,
+		TokenFile: func(provider string) string {
+			return filepath.Join(goosi.TheApp.AppPrefsDir(), provider+"-token.json")
+		},
+		Scopes: map[string][]string{
+			"google": {"https://mail.google.com/"},
+		},
+	})
 	d.NewDialog(a).Run()
 	return <-ec
 }
