@@ -11,7 +11,6 @@ require (
 	goki.dev/cursors v0.0.17
 	goki.dev/gi/v2 v2.0.0-dev0.0.13
 	goki.dev/girl v0.0.21
-	goki.dev/glop v0.1.4
 	goki.dev/goosi v0.0.11
 	goki.dev/grows v0.3.15
 	goki.dev/grr v0.0.6
@@ -63,6 +62,7 @@ require (
 	goki.dev/cam v0.9.35 // indirect
 	goki.dev/colors v0.8.29 // indirect
 	goki.dev/enums v0.9.38 // indirect
+	goki.dev/glop v0.1.4 // indirect
 	goki.dev/grog v0.0.13 // indirect
 	goki.dev/laser v0.1.18 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.13 // indirect
