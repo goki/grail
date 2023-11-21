@@ -53,13 +53,10 @@ func (a *App) Auth() error {
 // SignIn displays a dialog for the user to sign in with the platform of their choice.
 func (a *App) SignIn() error {
 	d := gi.NewBody().AddTitle("Sign in")
-	ec := make(chan error)
+	done := make(chan struct{})
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
-		// TODO(kai/grail): figure out a more secure way to save the token
-		err := jsons.Save(token, tpath)
 		d.Close()
-		ec <- err
+		done <- struct{}{}
 	}
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
@@ -71,7 +68,8 @@ func (a *App) SignIn() error {
 		},
 	})
 	d.NewDialog(a).Run()
-	return <-ec
+	<-done
+	return nil
 }
 
 /*
