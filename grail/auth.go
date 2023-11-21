@@ -10,7 +10,6 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
 	"goki.dev/grows/jsons"
@@ -22,17 +21,17 @@ import (
 // If the user does not already have a saved auth token, it calls [SignIn].
 func (a *App) Auth() error {
 	tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
-	exists, err := dirs.FileExists(tpath)
+	// exists, err := dirs.FileExists(tpath)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// if !exists {
+	err := a.SignIn()
 	if err != nil {
 		return err
 	}
-
-	if !exists {
-		err := a.SignIn()
-		if err != nil {
-			return err
-		}
-	}
+	// }
 
 	err = jsons.Open(&a.AuthToken, tpath)
 	if err != nil {
@@ -42,6 +41,10 @@ func (a *App) Auth() error {
 	if gi.Prefs.User.Email == "" {
 		return fmt.Errorf("email address not specified in preferences")
 	}
+
+	// if a.AuthToken.Expiry.Before(time.Now()) {
+	// 	google.
+	// }
 
 	a.AuthClient = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, a.AuthToken.AccessToken)
 	return nil
