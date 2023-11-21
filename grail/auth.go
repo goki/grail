@@ -58,6 +58,7 @@ func (a *App) SignIn() error {
 		tpath := filepath.Join(goosi.TheApp.AppPrefsDir(), "gmail-token.json")
 		// TODO(kai/grail): figure out a more secure way to save the token
 		err := jsons.Save(token, tpath)
+		d.Close()
 		ec <- err
 	}
 	kid.Buttons(d, fun, "https://mail.google.com/")

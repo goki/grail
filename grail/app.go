@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"golang.org/x/oauth2"
@@ -50,11 +49,6 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 func (a *App) ConfigWidget(sc *gi.Scene) {
 	if a.HasChildren() {
 		return
-	}
-
-	err := a.GetMail()
-	if grr.Log0(err) != nil {
-		gi.ErrorDialog(a, err, "Error getting mail").Run()
 	}
 
 	updt := a.UpdateStart()

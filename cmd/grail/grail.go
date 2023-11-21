@@ -8,6 +8,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/grail/grail"
+	"goki.dev/grr"
 )
 
 func main() { gimain.Run(app) }
@@ -19,5 +20,7 @@ func app() {
 	b.AddTopBar(func(pw gi.Widget) {
 		app.TopAppBar(b.TopAppBar(pw))
 	})
-	b.NewWindow().Run().Wait()
+	w := b.NewWindow().Run()
+	grr.Log0(app.GetMail())
+	w.Wait()
 }
