@@ -8,10 +8,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/dirs"
@@ -66,9 +64,7 @@ func (a *App) GetGmailRefreshToken() error {
 	if err != nil {
 		return err
 	}
-	port := rand.Intn(10_000)
-	sport := ":" + strconv.Itoa(port)
-	config.RedirectURL += sport
+	config.RedirectURL += ":5556"
 
 	code := make(chan string)
 	sm := http.NewServeMux()
@@ -77,12 +73,13 @@ func (a *App) GetGmailRefreshToken() error {
 		w.Write([]byte("<h1>Authentication Successful</h1><p>You can close this browser tab and return to Grail</p>"))
 	})
 	// TODO(kai/grail): more graceful closing / error handling
-	go http.ListenAndServe(sport, sm)
+	go http.ListenAndServe("127.0.0.1:5556", sm)
 
 	// use PKCE to protect against CSRF attacks
 	// https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-22.html#name-countermeasures-6
 	verifier := oauth2.GenerateVerifier()
 
+	// TODO(kai/grail): state
 	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
 	goosi.TheApp.OpenURL(url)
 
