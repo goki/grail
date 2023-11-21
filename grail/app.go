@@ -101,5 +101,13 @@ func (a *App) GetMail() error {
 	if err != nil {
 		return err
 	}
-	return a.GetMessages()
+	err = a.GetMessages()
+	if err != nil {
+		return err
+	}
+	updt := a.UpdateStart()
+	a.DeleteChildren(true)
+	a.Update()
+	a.UpdateEndLayout(updt)
+	return nil
 }
