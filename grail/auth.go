@@ -55,6 +55,7 @@ func (a *App) SignIn() error {
 	d := gi.NewBody().AddTitle("Sign in")
 	done := make(chan struct{})
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
+		fmt.Println(token, userInfo)
 		d.Close()
 		done <- struct{}{}
 	}

@@ -6,6 +6,7 @@ package grail
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log/slog"
 	"time"
@@ -131,6 +132,7 @@ func (a *App) GetMessages() error { //gti:add
 
 	a.Messages = make([]*Message, 0)
 	for msg := range messages {
+		fmt.Println(msg.Envelope.From)
 
 		from := make([]*mail.Address, len(msg.Envelope.From))
 		for i, fr := range msg.Envelope.From {
