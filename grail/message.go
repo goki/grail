@@ -21,8 +21,8 @@ import (
 
 // Message contains the relevant information for an email message.
 type Message struct {
-	From    []*mail.Address
-	To      []*mail.Address
+	From    []*mail.Address `view:"inline"`
+	To      []*mail.Address `view:"inline"`
 	Subject string
 	Body    string `view:"text-editor"`
 }
