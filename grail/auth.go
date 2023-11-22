@@ -9,7 +9,6 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi"
 	"goki.dev/grail/xoauth2"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
@@ -40,7 +39,7 @@ func (a *App) SignIn() (string, error) {
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider string) string {
-			return filepath.Join(goosi.TheApp.AppPrefsDir(), "auth", provider+"-token.json")
+			return filepath.Join(gi.AppPrefsDir(), "auth", provider+"-token.json")
 		},
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},

@@ -9,7 +9,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"goki.dev/goosi"
+	"goki.dev/gi/v2/gi"
 	"goki.dev/grows/jsons"
 	"goki.dev/grr"
 )
@@ -18,7 +18,7 @@ import (
 var Prefs = &Preferences{}
 
 func init() {
-	file := filepath.Join(goosi.TheApp.AppPrefsDir(), "prefs.json")
+	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
 	err := jsons.Open(Prefs, file)
 	if errors.Is(err, fs.ErrNotExist) {
 		grr.Log0(jsons.Save(Prefs, file))

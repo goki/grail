@@ -22,7 +22,6 @@ import (
 	"github.com/yuin/goldmark"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
 )
@@ -210,13 +209,13 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox string) error {
-	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail", email, mailbox))
+	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", email, mailbox))
 	err := dir.Init()
 	if err != nil {
 		return err
 	}
 
-	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "caching", email, mailbox, "cached-messages.json")
+	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", email, mailbox, "cached-messages.json")
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
