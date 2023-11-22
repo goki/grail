@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -25,6 +26,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
+	"goki.dev/grr"
 )
 
 // Message contains the relevant information for an email message.
@@ -179,8 +181,9 @@ func (a *App) CacheMessages() error {
 		return err
 	}
 
-	var cached []string
-	err = jsons.Open(&cached, filepath.Join(goosi.TheApp.AppPrefsDir(), "cached-messages.json"))
+	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "cached-messages.json")
+	var cached []uint32
+	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
@@ -202,22 +205,64 @@ func (a *App) CacheMessages() error {
 	}
 	_ = ibox
 
-	seqset := new(imap.SeqSet)
-	for _, c := range cached {
-		seqset.Add(c)
-	}
+	seqset := &imap.SeqSet{}
+	seqset.AddNum(cached...)
 
 	// we want messages with UIDs not in the list we already cached
 	criteria := imap.NewSearchCriteria()
-	nc := imap.NewSearchCriteria()
-	nc.Uid = seqset
-	criteria.Not = append(criteria.Not, nc)
+	if len(seqset.Set) > 0 {
+		nc := imap.NewSearchCriteria()
+		nc.Uid = seqset
+		criteria.Not = append(criteria.Not, nc)
+	}
 
+	// these are the UIDs of the new messages
 	uids, err := c.UidSearch(criteria)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println(uids)
+
+	// we only fetch the new messages
+	fseqset := &imap.SeqSet{}
+	fseqset.AddNum(uids...)
+
+	var sect imap.BodySectionName
+
+	messages := make(chan *imap.Message, 10)
+	done := make(chan error, 1)
+	go func() {
+		done <- c.UidFetch(fseqset, []imap.FetchItem{imap.FetchEnvelope, sect.FetchItem()}, messages)
+	}()
+
+	// at this point, we need to guarantee that we will incrementally
+	// save as many cached files as we get to before any error
+	defer func() {
+		// TODO(kai/grail): better error handling
+		grr.Log0(jsons.Save(&cached, cachedFile))
+	}()
+
+	for msg := range messages {
+		d, err := maildir.NewDelivery(string(dir))
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(d, msg.GetBody(&sect))
+		if err != nil {
+			return errors.Join(err, d.Close())
+		}
+		err = d.Close()
+		if err != nil {
+			return err
+		}
+
+		cached = append(cached, msg.Uid)
+	}
+
+	if err := <-done; err != nil {
+		return err
+	}
+
 	return nil
 }
