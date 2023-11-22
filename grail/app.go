@@ -6,6 +6,10 @@
 package grail
 
 import (
+	"fmt"
+	"io"
+
+	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-sasl"
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
@@ -13,6 +17,7 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"golang.org/x/oauth2"
@@ -55,7 +60,9 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp := gi.NewSplits(a)
 
+	var ml *gi.Frame
 	var msv *giv.StructView
+	var mb *gi.Frame
 
 	list := gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -72,7 +79,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 		})
 		fr.OnClick(func(e events.Event) {
 			a.ReadMessage = msg
-			msv.SetStruct(a.ReadMessage)
+			a.UpdateReadMessage(ml, msv, mb)
 		})
 
 		gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject).
@@ -87,13 +94,52 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 			})
 	}
 
-	mail := gi.NewFrame(sp, "mail").Style(func(s *styles.Style) {
+	ml = gi.NewFrame(sp, "mail")
+	ml.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	msv = giv.NewStructView(mail).SetStruct(a.ReadMessage)
+	msv = giv.NewStructView(ml, "msv")
+	mb = gi.NewFrame(ml, "mb")
+	mb.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+
+	a.UpdateReadMessage(ml, msv, mb)
 
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
+}
+
+// UpdateReadMessage updates the view of the message currently being read.
+func (a *App) UpdateReadMessage(ml *gi.Frame, msv *giv.StructView, mb *gi.Frame) {
+	if a.ReadMessage == nil {
+		return
+	}
+
+	msv.SetStruct(a.ReadMessage)
+
+	updt := mb.UpdateStart()
+	if mb.HasChildren() {
+		mb.DeleteChildren(true)
+	}
+
+	mr := grr.Log(mail.CreateReader(a.ReadMessage.BodyReader))
+	for {
+		p, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			grr.Log0(err)
+		}
+
+		switch h := p.Header.(type) {
+		case *mail.InlineHeader:
+			fmt.Println(h.ContentType())
+			gi.NewLabel(mb).SetText(string(grr.Log(io.ReadAll(p.Body))))
+		}
+	}
+	mb.Update()
+	mb.UpdateEndLayout(updt)
 }
 
 func (a *App) GetMail() error {
