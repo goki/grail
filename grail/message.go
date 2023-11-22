@@ -6,18 +6,25 @@ package grail
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"io/fs"
 	"log/slog"
+	"path/filepath"
 	"slices"
 	"time"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-maildir"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-smtp"
 	"github.com/yuin/goldmark"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grows/jsons"
 )
 
 // Message contains the relevant information for an email message.
@@ -158,5 +165,59 @@ func (a *App) GetMessages() error { //gti:add
 	if err := <-done; err != nil {
 		return err
 	}
+	return nil
+}
+
+// CacheMessages caches all of the messages from the server that
+// have not already been cached. It caches them using maildir at
+//
+//	filepath.Join(goosi.TheApp.AppPrefsDir(), "mail")
+func (a *App) CacheMessages() error {
+	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail"))
+	err := dir.Init()
+	if err != nil {
+		return err
+	}
+
+	var cached []string
+	err = jsons.Open(&cached, filepath.Join(goosi.TheApp.AppPrefsDir(), "cached-messages.json"))
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+
+	c, err := client.DialTLS("imap.gmail.com:993", nil)
+	if err != nil {
+		return err
+	}
+	defer c.Logout()
+
+	err = c.Authenticate(a.AuthClient)
+	if err != nil {
+		return err
+	}
+
+	ibox, err := c.Select("INBOX", false)
+	if err != nil {
+		return err
+	}
+	_ = ibox
+
+	seqset := new(imap.SeqSet)
+	for _, c := range cached {
+		seqset.Add(c)
+	}
+
+	// we want messages with UIDs not in the list we already cached
+	criteria := imap.NewSearchCriteria()
+	nc := imap.NewSearchCriteria()
+	nc.Uid = seqset
+	criteria.Not = append(criteria.Not, nc)
+
+	uids, err := c.UidSearch(criteria)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(uids)
 	return nil
 }

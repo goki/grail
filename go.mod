@@ -5,13 +5,17 @@ go 1.21.0
 require (
 	github.com/coreos/go-oidc/v3 v3.7.0
 	github.com/emersion/go-imap v1.2.1
+	github.com/emersion/go-maildir v0.3.1
 	github.com/emersion/go-message v0.17.0
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43
 	github.com/emersion/go-smtp v0.19.0
+	github.com/yuin/goldmark v1.6.0
 	goki.dev/cursors v0.0.17
 	goki.dev/gi/v2 v2.0.0-dev0.0.13
 	goki.dev/girl v0.0.21
+	goki.dev/glide v0.0.1
 	goki.dev/goosi v0.0.11
+	goki.dev/grows v0.3.15
 	goki.dev/grr v0.0.6
 	goki.dev/gti v0.1.16
 	goki.dev/icons v0.0.9
@@ -36,6 +40,7 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
+	github.com/ericchiang/css v1.3.0 // indirect
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
@@ -63,7 +68,6 @@ require (
 	goki.dev/enums v0.9.38 // indirect
 	goki.dev/glop v0.1.4 // indirect
 	goki.dev/grog v0.0.13 // indirect
-	goki.dev/grows v0.3.15 // indirect
 	goki.dev/laser v0.1.18 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.13 // indirect
 	goki.dev/pi/v2 v2.0.0-dev0.0.12 // indirect
