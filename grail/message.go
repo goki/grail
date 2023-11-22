@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -40,7 +41,7 @@ type Message struct {
 // Compose pulls up a dialog to send a new message
 func (a *App) Compose() { //gti:add
 	a.ComposeMessage = &Message{}
-	a.ComposeMessage.From = []*mail.Address{{Address: gi.Prefs.User.Email}}
+	a.ComposeMessage.From = []*mail.Address{{Address: Prefs.Accounts[0]}}
 	b := gi.NewBody().AddTitle("Send message")
 	giv.NewStructView(b).SetStruct(a.ComposeMessage)
 	b.AddBottomBar(func(pw gi.Widget) {
@@ -210,7 +211,11 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox string) error {
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", email, mailbox))
-	err := dir.Init()
+	err := os.MkdirAll(string(dir), 0700)
+	if err != nil {
+		return err
+	}
+	err = dir.Init()
 	if err != nil {
 		return err
 	}

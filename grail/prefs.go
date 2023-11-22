@@ -17,7 +17,9 @@ import (
 // Prefs is the global instance of [Preferences], loaded on startup.
 var Prefs = &Preferences{}
 
-func init() {
+// Init initializes the grail preferences. It needs to be called inside of
+// a [gimain.Run] app function.
+func Init() {
 	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
 	err := jsons.Open(Prefs, file)
 	if errors.Is(err, fs.ErrNotExist) {

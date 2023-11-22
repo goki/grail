@@ -6,6 +6,7 @@ package grail
 
 import (
 	"path/filepath"
+	"slices"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
@@ -32,6 +33,9 @@ func (a *App) SignIn() (string, error) {
 	d := gi.NewBody().AddTitle("Sign in")
 	email := make(chan string)
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
+		if !slices.Contains(Prefs.Accounts, userInfo.Email) {
+			Prefs.Accounts = append(Prefs.Accounts, userInfo.Email)
+		}
 		a.AuthToken[userInfo.Email] = token
 		d.Close()
 		email <- userInfo.Email
