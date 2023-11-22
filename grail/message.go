@@ -6,7 +6,6 @@ package grail
 
 import (
 	"bytes"
-	"io"
 	"log/slog"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-smtp"
+	"github.com/yuin/goldmark"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi/events"
@@ -70,7 +70,10 @@ func (a *App) SendMessage() error { //gti:add
 	if err != nil {
 		return err
 	}
-	io.WriteString(w, a.ComposeMessage.Body)
+	err = goldmark.Convert([]byte(a.ComposeMessage.Body), w)
+	if err != nil {
+		return err
+	}
 	w.Close()
 	tw.Close()
 
