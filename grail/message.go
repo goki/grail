@@ -204,6 +204,17 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		return err
 	}
 
+	mailboxes := make(chan *imap.MailboxInfo, 10)
+	done := make(chan error, 1)
+	go func() {
+		done <- c.List("", "*", mailboxes)
+	}()
+
+	fmt.Println("Mailboxes:")
+	for m := range mailboxes {
+		fmt.Println("* " + m.Name)
+	}
+
 	return a.CacheMessagesForMailbox(c, email, "INBOX")
 }
 
@@ -266,7 +277,7 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 
 	var sect imap.BodySectionName
 
-	messages := make(chan *imap.Message, 10)
+	messages := make(chan *imap.Message, 100)
 	done := make(chan error, 1)
 	go func() {
 		done <- c.UidFetch(fseqset, []imap.FetchItem{sect.FetchItem()}, messages)
