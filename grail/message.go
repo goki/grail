@@ -7,7 +7,6 @@ package grail
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -205,12 +204,12 @@ func (a *App) CacheMessages() error {
 	}
 	_ = ibox
 
-	seqset := &imap.SeqSet{}
-	seqset.AddNum(cached...)
-
 	// we want messages with UIDs not in the list we already cached
 	criteria := imap.NewSearchCriteria()
-	if len(seqset.Set) > 0 {
+	if len(cached) > 0 {
+		seqset := &imap.SeqSet{}
+		seqset.AddNum(cached...)
+
 		nc := imap.NewSearchCriteria()
 		nc.Uid = seqset
 		criteria.Not = append(criteria.Not, nc)
@@ -222,7 +221,9 @@ func (a *App) CacheMessages() error {
 		return err
 	}
 
-	fmt.Println(uids)
+	if len(uids) == 0 {
+		return nil
+	}
 
 	// we only fetch the new messages
 	fseqset := &imap.SeqSet{}
