@@ -27,7 +27,7 @@ type Message struct {
 	// only for sending
 	Body string `view:"text-editor" viewif:"BodyReader==nil"`
 	// only for receiving
-	BodyReader io.Reader `view:"-"`
+	BodyReader imap.Literal `view:"-"`
 }
 
 // Compose pulls up a dialog to send a new message
