@@ -6,7 +6,6 @@
 package grail
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/emersion/go-message/mail"
@@ -16,6 +15,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
+	"goki.dev/glide/gidom"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -134,8 +134,13 @@ func (a *App) UpdateReadMessage(ml *gi.Frame, msv *giv.StructView, mb *gi.Frame)
 
 		switch h := p.Header.(type) {
 		case *mail.InlineHeader:
-			fmt.Println(h.ContentType())
-			gi.NewLabel(mb).SetText(string(grr.Log(io.ReadAll(p.Body))))
+			ct, _ := grr.Log2(h.ContentType())
+			switch ct {
+			case "text/plain":
+				grr.Log0(gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(p.Body))))
+			case "text/html":
+				grr.Log0(gidom.ReadHTML(gidom.BaseContext(), mb, p.Body))
+			}
 		}
 	}
 	mb.Update()
