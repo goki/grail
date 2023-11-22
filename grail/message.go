@@ -223,6 +223,10 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	}
 
 	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", hemail, mailbox, "cached-messages.json")
+	err = os.MkdirAll(filepath.Dir(cachedFile), 0700)
+	if err != nil {
+		return err
+	}
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
