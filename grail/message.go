@@ -6,6 +6,7 @@ package grail
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -210,7 +211,8 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox string) error {
-	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", email, mailbox))
+	hemail := hex.EncodeToString([]byte(email))
+	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", hemail, mailbox))
 	err := os.MkdirAll(string(dir), 0700)
 	if err != nil {
 		return err
@@ -220,7 +222,7 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 		return err
 	}
 
-	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", email, mailbox, "cached-messages.json")
+	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", hemail, mailbox, "cached-messages.json")
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
