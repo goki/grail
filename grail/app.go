@@ -152,14 +152,12 @@ func (a *App) GetMail() error {
 	if err != nil {
 		return err
 	}
-	err = a.GetMessages()
-	if err != nil {
-		return err
-	}
-	err = a.CacheMessages()
-	if err != nil {
-		return err
-	}
+	go func() {
+		err = a.CacheMessages()
+		if err != nil {
+			gi.ErrorDialog(a, err, "Error caching messages").Run()
+		}
+	}()
 	updt := a.UpdateStart()
 	a.DeleteChildren(true)
 	a.Update()

@@ -25,7 +25,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
-	"goki.dev/grr"
 )
 
 // Message contains the relevant information for an email message.
@@ -237,13 +236,6 @@ func (a *App) CacheMessages() error {
 		done <- c.UidFetch(fseqset, []imap.FetchItem{imap.FetchEnvelope, sect.FetchItem()}, messages)
 	}()
 
-	// at this point, we need to guarantee that we will incrementally
-	// save as many cached files as we get to before any error
-	defer func() {
-		// TODO(kai/grail): better error handling
-		grr.Log0(jsons.Save(&cached, cachedFile))
-	}()
-
 	for msg := range messages {
 		d, err := maildir.NewDelivery(string(dir))
 		if err != nil {
@@ -258,7 +250,13 @@ func (a *App) CacheMessages() error {
 			return err
 		}
 
+		// we need to save the list of cached messages every time in case
+		// we get interrupted or have an error
 		cached = append(cached, msg.Uid)
+		err = jsons.Save(&cached, cachedFile)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := <-done; err != nil {
