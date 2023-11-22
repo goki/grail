@@ -169,23 +169,9 @@ func (a *App) GetMessages() error { //gti:add
 }
 
 // CacheMessages caches all of the messages from the server that
-// have not already been cached. It caches them using maildir at
-//
-//	filepath.Join(goosi.TheApp.AppPrefsDir(), "mail")
+// have not already been cached. It caches them using maildir in
+// the app's prefs directory.
 func (a *App) CacheMessages() error {
-	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail"))
-	err := dir.Init()
-	if err != nil {
-		return err
-	}
-
-	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "cached-messages.json")
-	var cached []uint32
-	err = jsons.Open(&cached, cachedFile)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
-	}
-
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
 		return err
@@ -197,7 +183,27 @@ func (a *App) CacheMessages() error {
 		return err
 	}
 
-	ibox, err := c.Select("INBOX", false)
+	return a.CacheMessagesForMailbox(c, "INBOX")
+}
+
+// CacheMessagesForMailbox caches all of the messages from the server
+// in the given mailbox that have not already been cached. It caches
+// them using maildir in the app's prefs directory.
+func (a *App) CacheMessagesForMailbox(c *client.Client, mailbox string) error {
+	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail", mailbox))
+	err := dir.Init()
+	if err != nil {
+		return err
+	}
+
+	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "caching", mailbox, "cached-messages.json")
+	var cached []uint32
+	err = jsons.Open(&cached, cachedFile)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+
+	ibox, err := c.Select(mailbox, false)
 	if err != nil {
 		return err
 	}
@@ -233,7 +239,7 @@ func (a *App) CacheMessages() error {
 	messages := make(chan *imap.Message, 10)
 	done := make(chan error, 1)
 	go func() {
-		done <- c.UidFetch(fseqset, []imap.FetchItem{imap.FetchEnvelope, sect.FetchItem()}, messages)
+		done <- c.UidFetch(fseqset, []imap.FetchItem{sect.FetchItem()}, messages)
 	}()
 
 	for msg := range messages {
