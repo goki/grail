@@ -20,7 +20,6 @@ func app() {
 	b.AddTopBar(func(pw gi.Widget) {
 		app.TopAppBar(b.TopAppBar(pw))
 	})
-	w := b.NewWindow().Run()
 	grr.Log0(app.GetMail())
-	w.Wait()
+	b.NewWindow().Run().Wait()
 }

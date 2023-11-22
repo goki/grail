@@ -23,7 +23,7 @@ type App struct {
 	gi.Frame
 
 	// AuthToken is [oauth2.Token] for the signed in user.
-	AuthToken oauth2.Token
+	AuthToken *oauth2.Token
 
 	// AuthClient is the [sasl.Client] authentication for sending messages
 	AuthClient sasl.Client
