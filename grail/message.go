@@ -7,6 +7,7 @@ package grail
 import (
 	"bytes"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/emersion/go-imap"
@@ -152,6 +153,7 @@ func (a *App) GetMessages() error { //gti:add
 		}
 		a.Messages = append(a.Messages, m)
 	}
+	slices.Reverse(a.Messages)
 
 	if err := <-done; err != nil {
 		return err
