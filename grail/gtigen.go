@@ -5,9 +5,11 @@ package grail
 import (
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
+	"golang.org/x/oauth2"
 )
 
 // AppType is the [gti.Type] for [App]
@@ -18,29 +20,20 @@ var AppType = gti.AddType(&gti.Type{
 	Doc:        "App is an email client app.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Auth", &gti.Field{Name: "Auth", Type: "github.com/emersion/go-sasl.Client", LocalType: "sasl.Client", Doc: "Auth is the [sasl.Client] authentication for sending messages", Directives: gti.Directives{}, Tag: ""}},
+		{"AuthToken", &gti.Field{Name: "AuthToken", Type: "map[string]*golang.org/x/oauth2.Token", LocalType: "map[string]*oauth2.Token", Doc: "AuthToken contains the [oauth2.Token] for each account.", Directives: gti.Directives{}, Tag: ""}},
+		{"AuthClient", &gti.Field{Name: "AuthClient", Type: "map[string]github.com/emersion/go-sasl.Client", LocalType: "map[string]sasl.Client", Doc: "AuthClient contains the [sasl.Client] authentication for sending messages for each account.", Directives: gti.Directives{}, Tag: ""}},
 		{"ComposeMessage", &gti.Field{Name: "ComposeMessage", Type: "*goki.dev/grail/grail.Message", LocalType: "*Message", Doc: "ComposeMessage is the current message we are editing", Directives: gti.Directives{}, Tag: ""}},
 		{"ReadMessage", &gti.Field{Name: "ReadMessage", Type: "*goki.dev/grail/grail.Message", LocalType: "*Message", Doc: "ReadMessage is the current message we are reading", Directives: gti.Directives{}, Tag: ""}},
-		{"Messages", &gti.Field{Name: "Messages", Type: "[]*goki.dev/grail/grail.Message", LocalType: "[]*Message", Doc: "Messages are the messages we have fetched from the server that we can read", Directives: gti.Directives{}, Tag: ""}},
+		{"Messages", &gti.Field{Name: "Messages", Type: "[]*goki.dev/grail/grail.Message", LocalType: "[]*Message", Doc: "Messages are the current messages we are viewing", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"AuthGmail", &gti.Method{Name: "AuthGmail", Doc: "AuthGmail authenticates the user with gmail.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
 		{"Compose", &gti.Method{Name: "Compose", Doc: "Compose pulls up a dialog to send a new message", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SendMessage", &gti.Method{Name: "SendMessage", Doc: "SendMessage sends the current message", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"GetMessages", &gti.Method{Name: "GetMessages", Doc: "GetMessages fetches the messages from the server", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -67,9 +60,16 @@ func (t *App) New() ki.Ki {
 	return &App{}
 }
 
-// SetAuth sets the [App.Auth]:
-// Auth is the [sasl.Client] authentication for sending messages
-func (t *App) SetAuth(v sasl.Client) *App {
+// SetAuthToken sets the [App.AuthToken]:
+// AuthToken contains the [oauth2.Token] for each account.
+func (t *App) SetAuthToken(v map[string]*oauth2.Token) *App {
+	t.AuthToken = v
+	return t
+}
+
+// SetAuthClient sets the [App.AuthClient]:
+// AuthClient contains the [sasl.Client] authentication for sending messages for each account.
+func (t *App) SetAuthClient(v map[string]sasl.Client) *App {
 	t.AuthClient = v
 	return t
 }
@@ -89,7 +89,7 @@ func (t *App) SetReadMessage(v *Message) *App {
 }
 
 // SetMessages sets the [App.Messages]:
-// Messages are the messages we have fetched from the server that we can read
+// Messages are the current messages we are viewing
 func (t *App) SetMessages(v []*Message) *App {
 	t.Messages = v
 	return t
@@ -104,6 +104,12 @@ func (t *App) SetTooltip(v string) *App {
 // SetClass sets the [App.Class]
 func (t *App) SetClass(v string) *App {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [App.PriorityEvents]
+func (t *App) SetPriorityEvents(v []events.Types) *App {
+	t.PriorityEvents = v
 	return t
 }
 

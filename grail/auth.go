@@ -5,7 +5,6 @@
 package grail
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -19,38 +18,34 @@ import (
 // Auth authorizes access to the user's mail and sets [App.AuthClient].
 // If the user does not already have a saved auth token, it calls [SignIn].
 func (a *App) Auth() error {
-	err := a.SignIn()
+	email, err := a.SignIn()
 	if err != nil {
 		return err
 	}
 
-	if gi.Prefs.User.Email == "" {
-		return fmt.Errorf("email address not specified in preferences")
-	}
-
-	a.AuthClient = xoauth2.NewXoauth2Client(gi.Prefs.User.Email, a.AuthToken.AccessToken)
+	a.AuthClient[email] = xoauth2.NewXoauth2Client(email, a.AuthToken[email].AccessToken)
 	return nil
 }
 
 // SignIn displays a dialog for the user to sign in with the platform of their choice.
-func (a *App) SignIn() error {
+// It returns the user's email address.
+func (a *App) SignIn() (string, error) {
 	d := gi.NewBody().AddTitle("Sign in")
-	done := make(chan struct{})
+	email := make(chan string)
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		a.AuthToken = token
+		a.AuthToken[userInfo.Email] = token
 		d.Close()
-		done <- struct{}{}
+		email <- userInfo.Email
 	}
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider string) string {
-			return filepath.Join(goosi.TheApp.AppPrefsDir(), provider+"-token.json")
+			return filepath.Join(goosi.TheApp.AppPrefsDir(), "auth", provider+"-token.json")
 		},
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},
 		},
 	})
 	d.NewDialog(a).Run()
-	<-done
-	return nil
+	return <-email, nil
 }

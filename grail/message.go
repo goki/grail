@@ -7,11 +7,11 @@ package grail
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
-	"slices"
 	"time"
 
 	"github.com/emersion/go-imap"
@@ -55,6 +55,11 @@ func (a *App) Compose() { //gti:add
 
 // SendMessage sends the current message
 func (a *App) SendMessage() error { //gti:add
+	if len(a.ComposeMessage.From) != 1 {
+		return fmt.Errorf("expected 1 sender, but got %d", len(a.ComposeMessage.From))
+	}
+	email := a.ComposeMessage.From[0].Address
+
 	var b bytes.Buffer
 
 	var h mail.Header
@@ -92,8 +97,8 @@ func (a *App) SendMessage() error { //gti:add
 
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
-		a.AuthClient,
-		gi.Prefs.User.Email,
+		a.AuthClient[email],
+		email,
 		to,
 		&b,
 	)
@@ -104,6 +109,7 @@ func (a *App) SendMessage() error { //gti:add
 	return err
 }
 
+/*
 // GetMessages fetches the messages from the server
 func (a *App) GetMessages() error { //gti:add
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
@@ -167,36 +173,50 @@ func (a *App) GetMessages() error { //gti:add
 	}
 	return nil
 }
+*/
 
 // CacheMessages caches all of the messages from the server that
 // have not already been cached. It caches them using maildir in
 // the app's prefs directory.
 func (a *App) CacheMessages() error {
+	for _, account := range Prefs.Accounts {
+		err := a.CacheMessagesForAccount(account)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CacheMessages caches all of the messages from the server that
+// have not already been cached for the given email account. It
+// caches them using maildir in the app's prefs directory.
+func (a *App) CacheMessagesForAccount(email string) error {
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
 		return err
 	}
 	defer c.Logout()
 
-	err = c.Authenticate(a.AuthClient)
+	err = c.Authenticate(a.AuthClient[email])
 	if err != nil {
 		return err
 	}
 
-	return a.CacheMessagesForMailbox(c, "INBOX")
+	return a.CacheMessagesForMailbox(c, email, "INBOX")
 }
 
 // CacheMessagesForMailbox caches all of the messages from the server
-// in the given mailbox that have not already been cached. It caches
-// them using maildir in the app's prefs directory.
-func (a *App) CacheMessagesForMailbox(c *client.Client, mailbox string) error {
-	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail", mailbox))
+// that have not already been cached for the given email account and mailbox.
+// It caches them using maildir in the app's prefs directory.
+func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox string) error {
+	dir := maildir.Dir(filepath.Join(goosi.TheApp.AppPrefsDir(), "mail", email, mailbox))
 	err := dir.Init()
 	if err != nil {
 		return err
 	}
 
-	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "caching", mailbox, "cached-messages.json")
+	cachedFile := filepath.Join(goosi.TheApp.AppPrefsDir(), "caching", email, mailbox, "cached-messages.json")
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {

@@ -27,11 +27,11 @@ import (
 type App struct {
 	gi.Frame
 
-	// AuthToken is [oauth2.Token] for the signed in user.
-	AuthToken *oauth2.Token
+	// AuthToken contains the [oauth2.Token] for each account.
+	AuthToken map[string]*oauth2.Token
 
-	// AuthClient is the [sasl.Client] authentication for sending messages
-	AuthClient sasl.Client
+	// AuthClient contains the [sasl.Client] authentication for sending messages for each account.
+	AuthClient map[string]sasl.Client
 
 	// ComposeMessage is the current message we are editing
 	ComposeMessage *Message
@@ -39,12 +39,17 @@ type App struct {
 	// ReadMessage is the current message we are reading
 	ReadMessage *Message
 
-	// Messages are the messages we have fetched from the server that we can read
+	// Messages are the current messages we are viewing
 	Messages []*Message
 }
 
 // needed for interface import
 var _ ki.Ki = (*App)(nil)
+
+func (a *App) OnInit() {
+	a.AuthToken = map[string]*oauth2.Token{}
+	a.AuthClient = map[string]sasl.Client{}
+}
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
