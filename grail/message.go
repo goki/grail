@@ -176,6 +176,15 @@ func (a *App) GetMessages() error { //gti:add
 }
 */
 
+// CacheData contains the data stored for a cached message in the cached messages file.
+// It contains basic information about the message so that it can be displayed in the
+// mail list in the GUI.
+type CacheData struct {
+	imap.Envelope
+	UID      uint32
+	Filename string
+}
+
 // CacheMessages caches all of the messages from the server that
 // have not already been cached. It caches them using maildir in
 // the app's prefs directory.
@@ -239,7 +248,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	if err != nil {
 		return err
 	}
-	var cached []uint32
+	var cached []*CacheData
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("opening cache list: %w", err)
@@ -255,7 +264,9 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	criteria := &imap.SearchCriteria{}
 	if len(cached) > 0 {
 		seqset := imap.SeqSet{}
-		seqset.AddNum(cached...)
+		for _, c := range cached {
+			seqset.AddNum(c.UID)
+		}
 
 		nc := imap.SearchCriteria{}
 		nc.UID = []imap.SeqSet{seqset}
@@ -324,9 +335,15 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 			return fmt.Errorf("closing message: %w", err)
 		}
 
+		cd := &CacheData{
+			Envelope: *mdata.Envelope,
+			UID:      mdata.UID,
+			Filename: "filename",
+		}
+
 		// we need to save the list of cached messages every time in case
 		// we get interrupted or have an error
-		cached = append(cached, mdata.UID)
+		cached = append(cached, cd)
 		err = jsons.Save(&cached, cachedFile)
 		if err != nil {
 			return fmt.Errorf("saving cache list: %w", err)
