@@ -83,11 +83,6 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbox string) error {
-	if a.Cache[email][mailbox] == nil {
-		a.Cache[email][mailbox] = []*CacheData{}
-	}
-	cached := a.Cache[email][mailbox]
-
 	bemail := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(email))
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, mailbox))
 	err := os.MkdirAll(string(dir), 0700)
@@ -105,10 +100,12 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		return err
 	}
 
+	var cached []*CacheData
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("opening cache list: %w", err)
 	}
+	a.Cache[email][mailbox] = cached
 
 	mbox, err := c.Select(mailbox, nil).Wait()
 	if err != nil {
