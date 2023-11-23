@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/coreos/go-oidc/v3 v3.7.0
-	github.com/emersion/go-imap v1.2.1
+	github.com/emersion/go-imap/v2 v2.0.0-alpha.7
 	github.com/emersion/go-maildir v0.3.1
 	github.com/emersion/go-message v0.17.0
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43

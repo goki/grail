@@ -16,8 +16,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/emersion/go-imap"
-	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-imap/v2"
+	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-maildir"
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-smtp"
@@ -36,7 +36,7 @@ type Message struct {
 	// only for sending
 	Body string `view:"text-editor" viewif:"BodyReader==nil"`
 	// only for receiving
-	BodyReader imap.Literal `view:"-"`
+	BodyReader imap.LiteralReader `view:"-"`
 }
 
 // Compose pulls up a dialog to send a new message
@@ -113,7 +113,7 @@ func (a *App) SendMessage() error { //gti:add
 /*
 // GetMessages fetches the messages from the server
 func (a *App) GetMessages() error { //gti:add
-	c, err := client.DialTLS("imap.gmail.com:993", nil)
+	c, err := imapclient.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (a *App) CacheMessages() error {
 // have not already been cached for the given email account. It
 // caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForAccount(email string) error {
-	c, err := client.DialTLS("imap.gmail.com:993", nil)
+	c, err := imapclient.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
 		return fmt.Errorf("TLS dialing: %w", err)
 	}
@@ -204,15 +204,14 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		return fmt.Errorf("authenticating: %w", err)
 	}
 
-	mailboxes := make(chan *imap.MailboxInfo, 10)
-	done := make(chan error, 1)
-	go func() {
-		done <- c.List("", "*", mailboxes)
-	}()
+	mailboxes, err := c.List("", "%", nil).Collect()
+	if err != nil {
+		return fmt.Errorf("getting mailboxes: %w", err)
+	}
 
-	fmt.Println("Mailboxes:")
-	for m := range mailboxes {
-		fmt.Println("* " + m.Name)
+	fmt.Printf("Found %d mailboxes\n", len(mailboxes))
+	for _, mbox := range mailboxes {
+		fmt.Println("* " + mbox.Mailbox)
 	}
 
 	a.CurMailbox = "INBOX"
@@ -223,7 +222,7 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // CacheMessagesForMailbox caches all of the messages from the server
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
-func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox string) error {
+func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbox string) error {
 	hemail := hex.EncodeToString([]byte(email))
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", hemail, mailbox))
 	err := os.MkdirAll(string(dir), 0700)
@@ -246,54 +245,51 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 		return fmt.Errorf("opening cache list: %w", err)
 	}
 
-	ibox, err := c.Select(mailbox, false)
+	mbox, err := c.Select(mailbox, nil).Wait()
 	if err != nil {
 		return fmt.Errorf("opening mailbox: %w", err)
 	}
-	_ = ibox
+	_ = mbox
 
 	// we want messages with UIDs not in the list we already cached
-	criteria := imap.NewSearchCriteria()
+	criteria := &imap.SearchCriteria{}
 	if len(cached) > 0 {
-		seqset := &imap.SeqSet{}
+		seqset := imap.SeqSet{}
 		seqset.AddNum(cached...)
 
-		nc := imap.NewSearchCriteria()
-		nc.Uid = seqset
+		nc := imap.SearchCriteria{}
+		nc.UID = []imap.SeqSet{seqset}
 		criteria.Not = append(criteria.Not, nc)
 	}
 
 	// these are the UIDs of the new messages
-	uids, err := c.UidSearch(criteria)
+	uidsData, err := c.UIDSearch(criteria, nil).Wait()
 	if err != nil {
 		return fmt.Errorf("searching for uids: %w", err)
 	}
 
+	uids := uidsData.AllNums()
 	if len(uids) == 0 {
 		return nil
 	}
 
 	// we only fetch the new messages
-	fseqset := &imap.SeqSet{}
+	fseqset := imap.SeqSet{}
 	fseqset.AddNum(uids...)
 
-	var sect imap.BodySectionName
+	fetchOptions := &imap.FetchOptions{Envelope: true, BodySection: []*imap.FetchItemBodySection{}}
 
-	messages := make(chan *imap.Message, 100)
-	done := make(chan error, 1)
-	go func() {
-		done <- c.UidFetch(fseqset, []imap.FetchItem{sect.FetchItem()}, messages)
-	}()
+	messages, err := c.Fetch(fseqset, fetchOptions).Collect()
+	if err != nil {
+		return fmt.Errorf("fetching messages: %w", err)
+	}
 
-	for msg := range messages {
+	for _, message := range messages {
 		d, err := maildir.NewDelivery(string(dir))
 		if err != nil {
 			return fmt.Errorf("making mail delivery: %w", err)
 		}
-		_, err = io.Copy(d, msg.GetBody(&sect))
-		if err != nil {
-			return errors.Join(fmt.Errorf("copying message to file: %w", err), d.Close())
-		}
+		d.Write(message.BodySection[&imap.FetchItemBodySection{}])
 		err = d.Close()
 		if err != nil {
 			return fmt.Errorf("closing message: %w", err)
@@ -301,15 +297,11 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 
 		// we need to save the list of cached messages every time in case
 		// we get interrupted or have an error
-		cached = append(cached, msg.Uid)
+		cached = append(cached, message.UID)
 		err = jsons.Save(&cached, cachedFile)
 		if err != nil {
 			return fmt.Errorf("saving cache list: %w", err)
 		}
-	}
-
-	if err := <-done; err != nil {
-		return fmt.Errorf("fetching messages: %w", err)
 	}
 
 	return nil
