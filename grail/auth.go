@@ -5,7 +5,7 @@
 package grail
 
 import (
-	"encoding/hex"
+	"encoding/base32"
 	"path/filepath"
 	"slices"
 
@@ -47,7 +47,7 @@ func (a *App) SignIn() (string, error) {
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider, email string) string {
-			return filepath.Join(gi.AppPrefsDir(), "auth", hex.EncodeToString([]byte(email)), provider+"-token.json")
+			return filepath.Join(gi.AppPrefsDir(), "auth", base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(email)), provider+"-token.json")
 		},
 		Accounts: Prefs.Accounts,
 		Scopes: map[string][]string{
