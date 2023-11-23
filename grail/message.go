@@ -277,7 +277,11 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	fseqset := imap.SeqSet{}
 	fseqset.AddNum(uids...)
 
-	fetchOptions := &imap.FetchOptions{Envelope: true, BodySection: []*imap.FetchItemBodySection{}}
+	fetchOptions := &imap.FetchOptions{
+		Envelope:    true,
+		UID:         true,
+		BodySection: []*imap.FetchItemBodySection{},
+	}
 
 	mcmd := c.Fetch(fseqset, fetchOptions)
 
@@ -296,7 +300,10 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		if err != nil {
 			return fmt.Errorf("making mail delivery: %w", err)
 		}
-		d.Write(mdata.BodySection[&imap.FetchItemBodySection{}])
+		err = jsons.Write(mdata.BodySection, d)
+		if err != nil {
+			return fmt.Errorf("writing mail body: %w", err)
+		}
 		err = d.Close()
 		if err != nil {
 			return fmt.Errorf("closing message: %w", err)
