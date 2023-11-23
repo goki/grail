@@ -77,18 +77,28 @@ func (a *App) SendMessage() error { //gti:add
 	if err != nil {
 		return err
 	}
-	var th mail.InlineHeader
-	th.Set("Content-Type", "text/plain")
-	w, err := tw.CreatePart(th)
+	defer tw.Close()
+
+	var ph mail.InlineHeader
+	ph.Set("Content-Type", "text/plain")
+	pw, err := tw.CreatePart(ph)
 	if err != nil {
 		return err
 	}
-	err = goldmark.Convert([]byte(a.ComposeMessage.Body), w)
+	pw.Write([]byte(a.ComposeMessage.Body))
+	pw.Close()
+
+	var hh mail.InlineHeader
+	ph.Set("Content-Type", "text/html")
+	hw, err := tw.CreatePart(hh)
 	if err != nil {
 		return err
 	}
-	w.Close()
-	tw.Close()
+	err = goldmark.Convert([]byte(a.ComposeMessage.Body), hw)
+	if err != nil {
+		return err
+	}
+	hw.Close()
 
 	to := make([]string, len(a.ComposeMessage.To))
 	for i, t := range a.ComposeMessage.To {
