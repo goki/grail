@@ -7,7 +7,9 @@ package grail
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -19,7 +21,9 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
+	"goki.dev/glide/gidom"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 )
 
 // Message contains the relevant information for an email message.
@@ -135,7 +139,7 @@ func (a *App) UpdateMessageList() {
 		})
 		fr.OnClick(func(e events.Event) {
 			a.ReadMessage = cd
-			a.UpdateReadMessage()
+			grr.Log0(a.UpdateReadMessage())
 		})
 
 		ftxt := ""
@@ -160,9 +164,56 @@ func (a *App) UpdateMessageList() {
 }
 
 // UpdateReadMessage updates the view of the message currently being read.
-func (a *App) UpdateReadMessage() {
+func (a *App) UpdateReadMessage() error {
 	msv := a.FindPath("splits/mail/msv").(*giv.StructView)
 	msv.SetStruct(a.ReadMessage)
+
+	mb := a.FindPath("splits/mail/mb").(*gi.Frame)
+	updt := mb.UpdateStart()
+	mb.DeleteChildren(true)
+
+	f, err := os.Open(a.ReadMessage.Filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	mr, err := mail.CreateReader(f)
+	if err != nil {
+		return err
+	}
+
+	for {
+		p, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		switch h := p.Header.(type) {
+		case *mail.InlineHeader:
+			ct, _, err := h.ContentType()
+			if err != nil {
+				return err
+			}
+			switch ct {
+			case "text/plain":
+				err := gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(p.Body)))
+				if err != nil {
+					return err
+				}
+			case "text/html":
+				err := gidom.ReadHTML(gidom.BaseContext(), mb, p.Body)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	mb.Update()
+	mb.UpdateEndLayout(updt)
+	return nil
 }
 
 /*

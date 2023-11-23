@@ -78,7 +78,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	ml.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	giv.NewStructView(ml, "msv")
+	giv.NewStructView(ml, "msv").SetReadOnly(true)
 	gi.NewFrame(ml, "mb").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
