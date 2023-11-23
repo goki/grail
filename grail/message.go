@@ -134,8 +134,8 @@ func (a *App) UpdateMessageList() {
 			s.Cursor = cursors.Pointer
 		})
 		fr.OnClick(func(e events.Event) {
-			// a.ReadMessage = msg
-			// a.UpdateReadMessage(ml, msv, mb)
+			a.ReadMessage = cd
+			a.UpdateReadMessage()
 		})
 
 		ftxt := ""
@@ -157,6 +157,12 @@ func (a *App) UpdateMessageList() {
 
 	list.Update()
 	list.UpdateEndAsyncLayout(updt)
+}
+
+// UpdateReadMessage updates the view of the message currently being read.
+func (a *App) UpdateReadMessage() {
+	msv := a.FindPath("splits/mail/msv").(*giv.StructView)
+	msv.SetStruct(a.ReadMessage)
 }
 
 /*
