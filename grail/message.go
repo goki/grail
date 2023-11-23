@@ -110,12 +110,20 @@ func (a *App) UpdateMessageList() {
 
 	list := a.FindPath("splits/list").(*gi.Frame)
 
+	if list.NumChildren() > 100 {
+		return
+	}
+
 	updt := list.UpdateStartAsync()
 
 	list.DeleteChildren(true)
 
-	for _, cd := range cached {
+	for i, cd := range cached {
 		cd := cd
+
+		if i > 100 {
+			break
+		}
 
 		fr := gi.NewFrame(list).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
@@ -148,7 +156,7 @@ func (a *App) UpdateMessageList() {
 	}
 
 	list.Update()
-	list.UpdateEndAsync(updt)
+	list.UpdateEndAsyncLayout(updt)
 }
 
 /*

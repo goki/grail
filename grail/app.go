@@ -10,13 +10,10 @@ import (
 
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-sasl"
-	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/glide/gidom"
-	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -58,6 +55,13 @@ var _ ki.Ki = (*App)(nil)
 func (a *App) OnInit() {
 	a.AuthToken = map[string]*oauth2.Token{}
 	a.AuthClient = map[string]sasl.Client{}
+	a.AppStyles()
+}
+
+func (a *App) AppStyles() {
+	a.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
 }
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
@@ -78,35 +82,35 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	var msv *giv.StructView
 	var mb *gi.Frame
 
-	list := gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
+	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	for _, msg := range a.Messages {
-		msg := msg
-		fr := gi.NewFrame(list).Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
+	// for _, msg := range a.Messages {
+	// 	msg := msg
+	// 	fr := gi.NewFrame(list).Style(func(s *styles.Style) {
+	// 		s.Direction = styles.Column
+	// 	})
 
-		fr.Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
-			s.Cursor = cursors.Pointer
-		})
-		fr.OnClick(func(e events.Event) {
-			a.ReadMessage = msg
-			a.UpdateReadMessage(ml, msv, mb)
-		})
+	// 	fr.Style(func(s *styles.Style) {
+	// 		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
+	// 		s.Cursor = cursors.Pointer
+	// 	})
+	// 	fr.OnClick(func(e events.Event) {
+	// 		a.ReadMessage = msg
+	// 		a.UpdateReadMessage(ml, msv, mb)
+	// 	})
 
-		gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
-			})
-		gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
-			})
-	}
+	// 	gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject).
+	// 		Style(func(s *styles.Style) {
+	// 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	// 			s.Cursor = cursors.None
+	// 		})
+	// 	gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body).
+	// 		Style(func(s *styles.Style) {
+	// 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	// 			s.Cursor = cursors.None
+	// 		})
+	// }
 
 	ml = gi.NewFrame(sp, "mail")
 	ml.Style(func(s *styles.Style) {
