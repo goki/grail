@@ -89,7 +89,7 @@ func (a *App) SendMessage() error { //gti:add
 	pw.Close()
 
 	var hh mail.InlineHeader
-	ph.Set("Content-Type", "text/html")
+	hh.Set("Content-Type", "text/html")
 	hw, err := tw.CreatePart(hh)
 	if err != nil {
 		return err
