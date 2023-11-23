@@ -85,32 +85,6 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	// for _, msg := range a.Messages {
-	// 	msg := msg
-	// 	fr := gi.NewFrame(list).Style(func(s *styles.Style) {
-	// 		s.Direction = styles.Column
-	// 	})
-
-	// 	fr.Style(func(s *styles.Style) {
-	// 		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
-	// 		s.Cursor = cursors.Pointer
-	// 	})
-	// 	fr.OnClick(func(e events.Event) {
-	// 		a.ReadMessage = msg
-	// 		a.UpdateReadMessage(ml, msv, mb)
-	// 	})
-
-	// 	gi.NewLabel(fr, "subject").SetType(gi.LabelTitleMedium).SetText(msg.Subject).
-	// 		Style(func(s *styles.Style) {
-	// 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-	// 			s.Cursor = cursors.None
-	// 		})
-	// 	gi.NewLabel(fr, "body").SetType(gi.LabelBodyMedium).SetText(msg.Body).
-	// 		Style(func(s *styles.Style) {
-	// 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-	// 			s.Cursor = cursors.None
-	// 		})
-	// }
 
 	ml = gi.NewFrame(sp, "mail")
 	ml.Style(func(s *styles.Style) {
