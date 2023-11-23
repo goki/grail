@@ -83,7 +83,9 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbox string) error {
 	bemail := FilenameBase32(email)
-	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, mailbox))
+	bmbox := FilenameBase32(mailbox)
+
+	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox))
 	err := os.MkdirAll(string(dir), 0700)
 	if err != nil {
 		return err
@@ -93,7 +95,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		return fmt.Errorf("initializing maildir: %w", err)
 	}
 
-	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", bemail, mailbox, "cached-messages.json")
+	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", bemail, bmbox, "cached-messages.json")
 	err = os.MkdirAll(filepath.Dir(cachedFile), 0700)
 	if err != nil {
 		return err

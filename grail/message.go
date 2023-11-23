@@ -174,8 +174,9 @@ func (a *App) UpdateReadMessage() error {
 	mb.DeleteChildren(true)
 
 	bemail := FilenameBase32(a.CurEmail)
+	bmbox := FilenameBase32(a.CurMailbox)
 	// there can be flags at the end of the filename, so we have to glob it
-	glob := filepath.Join(gi.AppPrefsDir(), "mail", bemail, a.CurMailbox, "cur", a.ReadMessage.Filename+"*")
+	glob := filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox, "cur", a.ReadMessage.Filename+"*")
 	matches, err := filepath.Glob(glob)
 	if err != nil {
 		return err
