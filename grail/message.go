@@ -215,6 +215,8 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		fmt.Println("* " + m.Name)
 	}
 
+	a.CurMailbox = "INBOX"
+
 	return a.CacheMessagesForMailbox(c, email, "INBOX")
 }
 

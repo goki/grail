@@ -36,6 +36,7 @@ func (a *App) SignIn() (string, error) {
 		if !slices.Contains(Prefs.Accounts, userInfo.Email) {
 			Prefs.Accounts = append(Prefs.Accounts, userInfo.Email)
 		}
+		a.CurEmail = userInfo.Email
 		a.AuthToken[userInfo.Email] = token
 		d.Close()
 		email <- userInfo.Email

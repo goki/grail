@@ -41,6 +41,12 @@ type App struct {
 
 	// Messages are the current messages we are viewing
 	Messages []*Message
+
+	// The current email account
+	CurEmail string
+
+	// The current mailbox
+	CurMailbox string
 }
 
 // needed for interface import
