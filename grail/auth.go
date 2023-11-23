@@ -47,7 +47,7 @@ func (a *App) SignIn() (string, error) {
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider, email string) string {
-			return filepath.Join(gi.AppPrefsDir(), "auth", base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(email)), provider+"-token.json")
+			return filepath.Join(gi.AppPrefsDir(), "auth", FilenameBase32(email), provider+"-token.json")
 		},
 		Accounts: Prefs.Accounts,
 		Scopes: map[string][]string{
@@ -56,4 +56,9 @@ func (a *App) SignIn() (string, error) {
 	})
 	d.NewDialog(a).Run()
 	return <-email, nil
+}
+
+// FilenameBase32 converts the given string to a filename-safe base32 version.
+func FilenameBase32(s string) string {
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(s))
 }

@@ -5,7 +5,6 @@
 package grail
 
 import (
-	"encoding/base32"
 	"errors"
 	"fmt"
 	"io"
@@ -83,7 +82,7 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbox string) error {
-	bemail := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(email))
+	bemail := FilenameBase32(email)
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, mailbox))
 	err := os.MkdirAll(string(dir), 0700)
 	if err != nil {

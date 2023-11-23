@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -172,7 +173,9 @@ func (a *App) UpdateReadMessage() error {
 	updt := mb.UpdateStart()
 	mb.DeleteChildren(true)
 
-	f, err := os.Open(a.ReadMessage.Filename)
+	bemail := FilenameBase32(a.CurEmail)
+	fnm := filepath.Join(gi.AppPrefsDir(), "mail", bemail, a.CurMailbox, a.ReadMessage.Filename)
+	f, err := os.Open(fnm)
 	if err != nil {
 		return err
 	}
