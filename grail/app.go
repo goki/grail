@@ -42,6 +42,9 @@ type App struct {
 	// Messages are the current messages we are viewing
 	Messages []*Message
 
+	// Cache contains the cache data, keyed by account and then mailbox.
+	Cache map[string]map[string][]*CacheData
+
 	// The current email account
 	CurEmail string
 
