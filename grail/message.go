@@ -195,6 +195,9 @@ func (a *App) UpdateReadMessage() error {
 		return err
 	}
 
+	var plain *mail.Part
+	var gotHTML bool
+
 	for {
 		p, err := mr.NextPart()
 		if err == io.EOF {
@@ -209,20 +212,28 @@ func (a *App) UpdateReadMessage() error {
 			if err != nil {
 				return err
 			}
+
 			switch ct {
 			case "text/plain":
-				err := gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(p.Body)))
-				if err != nil {
-					return err
-				}
+				plain = p
 			case "text/html":
 				err := gidom.ReadHTML(gidom.BaseContext(), mb, p.Body)
 				if err != nil {
 					return err
 				}
+				gotHTML = true
 			}
 		}
 	}
+
+	// we only handle the plain version if there is no HTML version
+	if !gotHTML && plain != nil {
+		err := gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(plain.Body)))
+		if err != nil {
+			return err
+		}
+	}
+
 	mb.Update()
 	mb.UpdateEndLayout(updt)
 	return nil
