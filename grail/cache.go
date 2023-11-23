@@ -202,6 +202,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 			return fmt.Errorf("saving cache list: %w", err)
 		}
 
+		a.Cache[email][mailbox] = cached
 		a.UpdateMessageList()
 	}
 
