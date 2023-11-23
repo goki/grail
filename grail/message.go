@@ -310,9 +310,9 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 			return err
 		}
 
-		d, err := maildir.NewDelivery(string(dir))
+		key, w, err := dir.Create([]maildir.Flag{})
 		if err != nil {
-			return fmt.Errorf("making mail delivery: %w", err)
+			return fmt.Errorf("making maildir file: %w", err)
 		}
 
 		var header, text []byte
@@ -325,12 +325,12 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 			}
 		}
 
-		_, err = d.Write(append(header, text...))
+		_, err = w.Write(append(header, text...))
 		if err != nil {
 			return fmt.Errorf("writing message: %w", err)
 		}
 
-		err = d.Close()
+		err = w.Close()
 		if err != nil {
 			return fmt.Errorf("closing message: %w", err)
 		}
@@ -338,7 +338,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		cd := &CacheData{
 			Envelope: *mdata.Envelope,
 			UID:      mdata.UID,
-			Filename: "filename",
+			Filename: key,
 		}
 
 		// we need to save the list of cached messages every time in case
