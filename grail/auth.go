@@ -5,12 +5,14 @@
 package grail
 
 import (
+	"encoding/hex"
 	"path/filepath"
 	"slices"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/grail/xoauth2"
+	"goki.dev/grr"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
 )
@@ -35,6 +37,7 @@ func (a *App) SignIn() (string, error) {
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		if !slices.Contains(Prefs.Accounts, userInfo.Email) {
 			Prefs.Accounts = append(Prefs.Accounts, userInfo.Email)
+			grr.Log0(SavePrefs())
 		}
 		a.CurEmail = userInfo.Email
 		a.AuthToken[userInfo.Email] = token
@@ -43,9 +46,10 @@ func (a *App) SignIn() (string, error) {
 	}
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
-		TokenFile: func(provider string) string {
-			return filepath.Join(gi.AppPrefsDir(), "auth", provider+"-token.json")
+		TokenFile: func(provider, email string) string {
+			return filepath.Join(gi.AppPrefsDir(), "auth", hex.EncodeToString([]byte(email)), provider+"-token.json")
 		},
+		Accounts: Prefs.Accounts,
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},
 		},

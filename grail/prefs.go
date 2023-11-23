@@ -20,13 +20,23 @@ var Prefs = &Preferences{}
 // Init initializes the grail preferences. It needs to be called inside of
 // a [gimain.Run] app function.
 func Init() {
+	grr.Log0(OpenPrefs())
+}
+
+// OpenPrefs opens [Prefs] from the default location.
+func OpenPrefs() error {
 	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
 	err := jsons.Open(Prefs, file)
 	if errors.Is(err, fs.ErrNotExist) {
-		grr.Log0(jsons.Save(Prefs, file))
-	} else {
-		grr.Log0(err)
+		return jsons.Save(Prefs, file)
 	}
+	return err
+}
+
+// SavePrefs saves [Prefs] to the default location.
+func SavePrefs() error {
+	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
+	return jsons.Save(Prefs, file)
 }
 
 // Preferences are the preferences that control grail.
