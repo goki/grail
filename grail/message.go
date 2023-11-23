@@ -195,13 +195,13 @@ func (a *App) CacheMessages() error {
 func (a *App) CacheMessagesForAccount(email string) error {
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("TLS dialing: %w", err)
 	}
 	defer c.Logout()
 
 	err = c.Authenticate(a.AuthClient[email])
 	if err != nil {
-		return err
+		return fmt.Errorf("authenticating: %w", err)
 	}
 
 	mailboxes := make(chan *imap.MailboxInfo, 10)
@@ -232,7 +232,7 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	}
 	err = dir.Init()
 	if err != nil {
-		return err
+		return fmt.Errorf("initializing maildir: %w", err)
 	}
 
 	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", hemail, mailbox, "cached-messages.json")
@@ -243,12 +243,12 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
+		return fmt.Errorf("opening cache list: %w", err)
 	}
 
 	ibox, err := c.Select(mailbox, false)
 	if err != nil {
-		return err
+		return fmt.Errorf("opening mailbox: %w", err)
 	}
 	_ = ibox
 
@@ -266,7 +266,7 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	// these are the UIDs of the new messages
 	uids, err := c.UidSearch(criteria)
 	if err != nil {
-		return err
+		return fmt.Errorf("searching for uids: %w", err)
 	}
 
 	if len(uids) == 0 {
@@ -288,15 +288,15 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	for msg := range messages {
 		d, err := maildir.NewDelivery(string(dir))
 		if err != nil {
-			return err
+			return fmt.Errorf("making mail delivery: %w", err)
 		}
 		_, err = io.Copy(d, msg.GetBody(&sect))
 		if err != nil {
-			return errors.Join(err, d.Close())
+			return errors.Join(fmt.Errorf("copying message to file: %w", err), d.Close())
 		}
 		err = d.Close()
 		if err != nil {
-			return err
+			return fmt.Errorf("closing message: %w", err)
 		}
 
 		// we need to save the list of cached messages every time in case
@@ -304,12 +304,12 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 		cached = append(cached, msg.Uid)
 		err = jsons.Save(&cached, cachedFile)
 		if err != nil {
-			return err
+			return fmt.Errorf("saving cache list: %w", err)
 		}
 	}
 
 	if err := <-done; err != nil {
-		return err
+		return fmt.Errorf("fetching messages: %w", err)
 	}
 
 	return nil
