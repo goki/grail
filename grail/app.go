@@ -72,7 +72,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	updt := a.UpdateStart()
 
-	sp := gi.NewSplits(a)
+	sp := gi.NewSplits(a, "splits")
 
 	var ml *gi.Frame
 	var msv *giv.StructView

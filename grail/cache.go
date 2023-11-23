@@ -204,6 +204,8 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		if err != nil {
 			return fmt.Errorf("saving cache list: %w", err)
 		}
+
+		a.UpdateMessageList()
 	}
 
 	err = mcmd.Close()

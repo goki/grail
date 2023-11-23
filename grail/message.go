@@ -14,8 +14,11 @@ import (
 	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-smtp"
 	"github.com/yuin/goldmark"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 )
 
@@ -99,6 +102,53 @@ func (a *App) SendMessage() error { //gti:add
 		slog.Error("error sending message: SMTP error:", "code", se.Code, "enhancedCode", se.EnhancedCode, "message", se.Message)
 	}
 	return err
+}
+
+// UpdateMessageList updates the message list from [App.Cache].
+func (a *App) UpdateMessageList() {
+	cached := a.Cache[a.CurEmail][a.CurMailbox]
+
+	list := a.FindPath("splits/list").(*gi.Frame)
+
+	updt := list.UpdateStartAsync()
+
+	list.DeleteChildren(true)
+
+	for _, cd := range cached {
+		cd := cd
+
+		fr := gi.NewFrame(list).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+
+		fr.Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.Activatable, abilities.Hoverable)
+			s.Cursor = cursors.Pointer
+		})
+		fr.OnClick(func(e events.Event) {
+			// a.ReadMessage = msg
+			// a.UpdateReadMessage(ml, msv, mb)
+		})
+
+		ftxt := ""
+		for _, f := range cd.From {
+			ftxt += f.Name + " "
+		}
+
+		gi.NewLabel(fr, "from").SetType(gi.LabelTitleMedium).SetText(ftxt).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+			})
+		gi.NewLabel(fr, "subject").SetType(gi.LabelBodyMedium).SetText(cd.Subject).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+			})
+	}
+
+	list.Update()
+	list.UpdateEndAsync(updt)
 }
 
 /*
