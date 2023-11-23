@@ -330,11 +330,6 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 			return fmt.Errorf("writing message: %w", err)
 		}
 
-		err = w.(*os.File).Sync()
-		if err != nil {
-			return fmt.Errorf("saving message: %w", err)
-		}
-
 		err = w.Close()
 		if err != nil {
 			return fmt.Errorf("closing message: %w", err)
