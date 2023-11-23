@@ -242,7 +242,7 @@ func (a *App) CacheMessagesForMailbox(c *client.Client, email string, mailbox st
 	}
 	var cached []uint32
 	err = jsons.Open(&cached, cachedFile)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("opening cache list: %w", err)
 	}
 
