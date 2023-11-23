@@ -23,8 +23,10 @@ var AppType = gti.AddType(&gti.Type{
 		{"AuthToken", &gti.Field{Name: "AuthToken", Type: "map[string]*golang.org/x/oauth2.Token", LocalType: "map[string]*oauth2.Token", Doc: "AuthToken contains the [oauth2.Token] for each account.", Directives: gti.Directives{}, Tag: ""}},
 		{"AuthClient", &gti.Field{Name: "AuthClient", Type: "map[string]github.com/emersion/go-sasl.Client", LocalType: "map[string]sasl.Client", Doc: "AuthClient contains the [sasl.Client] authentication for sending messages for each account.", Directives: gti.Directives{}, Tag: ""}},
 		{"ComposeMessage", &gti.Field{Name: "ComposeMessage", Type: "*goki.dev/grail/grail.Message", LocalType: "*Message", Doc: "ComposeMessage is the current message we are editing", Directives: gti.Directives{}, Tag: ""}},
-		{"ReadMessage", &gti.Field{Name: "ReadMessage", Type: "*goki.dev/grail/grail.Message", LocalType: "*Message", Doc: "ReadMessage is the current message we are reading", Directives: gti.Directives{}, Tag: ""}},
-		{"Messages", &gti.Field{Name: "Messages", Type: "[]*goki.dev/grail/grail.Message", LocalType: "[]*Message", Doc: "Messages are the current messages we are viewing", Directives: gti.Directives{}, Tag: ""}},
+		{"Cache", &gti.Field{Name: "Cache", Type: "map[string]map[string][]*goki.dev/grail/grail.CacheData", LocalType: "map[string]map[string][]*CacheData", Doc: "Cache contains the cache data, keyed by account and then mailbox.", Directives: gti.Directives{}, Tag: ""}},
+		{"ReadMessage", &gti.Field{Name: "ReadMessage", Type: "*goki.dev/grail/grail.CacheData", LocalType: "*CacheData", Doc: "ReadMessage is the current message we are reading", Directives: gti.Directives{}, Tag: ""}},
+		{"CurEmail", &gti.Field{Name: "CurEmail", Type: "string", LocalType: "string", Doc: "The current email account", Directives: gti.Directives{}, Tag: ""}},
+		{"CurMailbox", &gti.Field{Name: "CurMailbox", Type: "string", LocalType: "string", Doc: "The current mailbox", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -81,17 +83,31 @@ func (t *App) SetComposeMessage(v *Message) *App {
 	return t
 }
 
+// SetCache sets the [App.Cache]:
+// Cache contains the cache data, keyed by account and then mailbox.
+func (t *App) SetCache(v map[string]map[string][]*CacheData) *App {
+	t.Cache = v
+	return t
+}
+
 // SetReadMessage sets the [App.ReadMessage]:
 // ReadMessage is the current message we are reading
-func (t *App) SetReadMessage(v *Message) *App {
+func (t *App) SetReadMessage(v *CacheData) *App {
 	t.ReadMessage = v
 	return t
 }
 
-// SetMessages sets the [App.Messages]:
-// Messages are the current messages we are viewing
-func (t *App) SetMessages(v []*Message) *App {
-	t.Messages = v
+// SetCurEmail sets the [App.CurEmail]:
+// The current email account
+func (t *App) SetCurEmail(v string) *App {
+	t.CurEmail = v
+	return t
+}
+
+// SetCurMailbox sets the [App.CurMailbox]:
+// The current mailbox
+func (t *App) SetCurMailbox(v string) *App {
+	t.CurMailbox = v
 	return t
 }
 

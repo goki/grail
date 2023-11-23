@@ -134,6 +134,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 
 	uids := uidsData.AllNums()
 	if len(uids) == 0 {
+		a.UpdateMessageList()
 		return nil
 	}
 

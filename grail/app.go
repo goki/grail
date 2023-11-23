@@ -6,15 +6,10 @@
 package grail
 
 import (
-	"io"
-
-	"github.com/emersion/go-message/mail"
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
-	"goki.dev/glide/gidom"
-	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"golang.org/x/oauth2"
@@ -33,14 +28,11 @@ type App struct {
 	// ComposeMessage is the current message we are editing
 	ComposeMessage *Message
 
-	// ReadMessage is the current message we are reading
-	ReadMessage *Message
-
-	// Messages are the current messages we are viewing
-	Messages []*Message
-
 	// Cache contains the cache data, keyed by account and then mailbox.
 	Cache map[string]map[string][]*CacheData
+
+	// ReadMessage is the current message we are reading
+	ReadMessage *CacheData
 
 	// The current email account
 	CurEmail string
@@ -78,66 +70,61 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp := gi.NewSplits(a, "splits")
 
-	var ml *gi.Frame
-	var msv *giv.StructView
-	var mb *gi.Frame
-
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
-	ml = gi.NewFrame(sp, "mail")
+	ml := gi.NewFrame(sp, "mail")
 	ml.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	msv = giv.NewStructView(ml, "msv")
-	mb = gi.NewFrame(ml, "mb")
-	mb.Style(func(s *styles.Style) {
+	giv.NewStructView(ml, "msv")
+	gi.NewFrame(ml, "mb").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
-	a.UpdateReadMessage(ml, msv, mb)
+	// a.UpdateReadMessage(ml, msv, mb)
 
 	sp.SetSplits(0.3, 0.7)
 	a.UpdateEndLayout(updt)
 }
 
-// UpdateReadMessage updates the view of the message currently being read.
-func (a *App) UpdateReadMessage(ml *gi.Frame, msv *giv.StructView, mb *gi.Frame) {
-	if a.ReadMessage == nil {
-		return
-	}
+// // UpdateReadMessage updates the view of the message currently being read.
+// func (a *App) UpdateReadMessage(ml *gi.Frame, msv *giv.StructView, mb *gi.Frame) {
+// 	if a.ReadMessage == nil {
+// 		return
+// 	}
 
-	msv.SetStruct(a.ReadMessage)
+// 	msv.SetStruct(a.ReadMessage)
 
-	updt := mb.UpdateStart()
-	if mb.HasChildren() {
-		mb.DeleteChildren(true)
-	}
+// 	updt := mb.UpdateStart()
+// 	if mb.HasChildren() {
+// 		mb.DeleteChildren(true)
+// 	}
 
-	mr := grr.Log(mail.CreateReader(a.ReadMessage.BodyReader))
-	for {
-		p, err := mr.NextPart()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			grr.Log0(err)
-		}
+// 	mr := grr.Log(mail.CreateReader(a.ReadMessage.BodyReader))
+// 	for {
+// 		p, err := mr.NextPart()
+// 		if err == io.EOF {
+// 			break
+// 		} else if err != nil {
+// 			grr.Log0(err)
+// 		}
 
-		switch h := p.Header.(type) {
-		case *mail.InlineHeader:
-			ct, _ := grr.Log2(h.ContentType())
-			switch ct {
-			case "text/plain":
-				grr.Log0(gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(p.Body))))
-			case "text/html":
-				grr.Log0(gidom.ReadHTML(gidom.BaseContext(), mb, p.Body))
-			}
-		}
-	}
-	mb.Update()
-	mb.UpdateEndLayout(updt)
-}
+// 		switch h := p.Header.(type) {
+// 		case *mail.InlineHeader:
+// 			ct, _ := grr.Log2(h.ContentType())
+// 			switch ct {
+// 			case "text/plain":
+// 				grr.Log0(gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(p.Body))))
+// 			case "text/html":
+// 				grr.Log0(gidom.ReadHTML(gidom.BaseContext(), mb, p.Body))
+// 			}
+// 		}
+// 	}
+// 	mb.Update()
+// 	mb.UpdateEndLayout(updt)
+// }
 
 func (a *App) GetMail() error {
 	err := a.Auth()
