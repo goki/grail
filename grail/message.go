@@ -204,7 +204,7 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		return fmt.Errorf("authenticating: %w", err)
 	}
 
-	mailboxes, err := c.List("", "%", nil).Collect()
+	mailboxes, err := c.List("", "*", nil).Collect()
 	if err != nil {
 		return fmt.Errorf("getting mailboxes: %w", err)
 	}
@@ -279,17 +279,24 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 
 	fetchOptions := &imap.FetchOptions{Envelope: true, BodySection: []*imap.FetchItemBodySection{}}
 
-	messages, err := c.Fetch(fseqset, fetchOptions).Collect()
-	if err != nil {
-		return fmt.Errorf("fetching messages: %w", err)
-	}
+	mcmd := c.Fetch(fseqset, fetchOptions)
 
-	for _, message := range messages {
+	for {
+		msg := mcmd.Next()
+		if msg == nil {
+			break
+		}
+
+		mdata, err := msg.Collect()
+		if err != nil {
+			return err
+		}
+
 		d, err := maildir.NewDelivery(string(dir))
 		if err != nil {
 			return fmt.Errorf("making mail delivery: %w", err)
 		}
-		d.Write(message.BodySection[&imap.FetchItemBodySection{}])
+		d.Write(mdata.BodySection[&imap.FetchItemBodySection{}])
 		err = d.Close()
 		if err != nil {
 			return fmt.Errorf("closing message: %w", err)
@@ -297,11 +304,16 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 
 		// we need to save the list of cached messages every time in case
 		// we get interrupted or have an error
-		cached = append(cached, message.UID)
+		cached = append(cached, mdata.UID)
 		err = jsons.Save(&cached, cachedFile)
 		if err != nil {
 			return fmt.Errorf("saving cache list: %w", err)
 		}
+	}
+
+	err = mcmd.Close()
+	if err != nil {
+		return fmt.Errorf("fetching messages: %w", err)
 	}
 
 	return nil
