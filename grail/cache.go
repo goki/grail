@@ -36,12 +36,13 @@ func (a *App) CacheMessages() error {
 	if a.Cache == nil {
 		a.Cache = map[string]map[string][]*CacheData{}
 	}
-	fmt.Println("scm")
 	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
-	updt := mbox.UpdateStartAsync()
+	updt := mbox.UpdateStart()
 	mbox.DeleteChildren(true)
-	defer mbox.Update()
-	defer mbox.UpdateEndAsyncLayout(updt)
+	defer func() {
+		mbox.Update()
+		mbox.UpdateEndAsync(updt)
+	}()
 	for _, account := range Prefs.Accounts {
 		err := a.CacheMessagesForAccount(account)
 		if err != nil {

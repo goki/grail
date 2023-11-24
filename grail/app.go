@@ -6,8 +6,6 @@
 package grail
 
 import (
-	"fmt"
-
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -72,7 +70,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp := gi.NewSplits(a, "splits")
 
-	mbox := giv.NewTreeView(sp, "mbox")
+	mbox := giv.NewTreeView(sp, "mbox").SetText("Mailboxes")
 	mbox.SetRootView(mbox)
 
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
@@ -92,7 +90,6 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp.SetSplits(0.1, 0.2, 0.7)
 	a.UpdateEndLayout(updt)
-	fmt.Println("dcw")
 }
 
 // // UpdateReadMessage updates the view of the message currently being read.
