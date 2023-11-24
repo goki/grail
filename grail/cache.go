@@ -47,7 +47,7 @@ func (a *App) CacheMessages() error {
 	for _, account := range Prefs.Accounts {
 		err := a.CacheMessagesForAccount(account)
 		if err != nil {
-			return err
+			return fmt.Errorf("caching messages for account %q: %w", account, err)
 		}
 	}
 	return nil
@@ -77,12 +77,13 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		return fmt.Errorf("getting mailboxes: %w", err)
 	}
 
-	fmt.Printf("Found %d mailboxes\n", len(mailboxes))
-	for _, mbox := range mailboxes {
-		fmt.Println("* " + mbox.Mailbox)
+	for _, mailbox := range mailboxes {
+		err := a.CacheMessagesForMailbox(c, email, mailbox.Mailbox)
+		if err != nil {
+			return fmt.Errorf("caching messages for mailbox %q: %w", mailbox.Mailbox, err)
+		}
 	}
-
-	return a.CacheMessagesForMailbox(c, email, "INBOX")
+	return nil
 }
 
 // CacheMessagesForMailbox caches all of the messages from the server
