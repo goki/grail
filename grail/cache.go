@@ -17,6 +17,7 @@ import (
 	"github.com/emersion/go-maildir"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
 )
 
@@ -81,8 +82,6 @@ func (a *App) CacheMessagesForAccount(email string) error {
 		fmt.Println("* " + mbox.Mailbox)
 	}
 
-	a.CurMailbox = "INBOX"
-
 	return a.CacheMessagesForMailbox(c, email, "INBOX")
 }
 
@@ -90,6 +89,10 @@ func (a *App) CacheMessagesForAccount(email string) error {
 // that have not already been cached for the given email account and mailbox.
 // It caches them using maildir in the app's prefs directory.
 func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbox string) error {
+	if a.CurMailbox == "" {
+		a.CurMailbox = mailbox
+	}
+
 	bemail := FilenameBase32(email)
 	bmbox := FilenameBase32(mailbox)
 
@@ -98,7 +101,11 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	if embox == nil {
 		embox = giv.NewTreeView(mbox, bemail).SetText(email).SetRootView(mbox)
 	}
-	giv.NewTreeView(embox, bmbox).SetText(mailbox).SetRootView(mbox)
+	giv.NewTreeView(embox, bmbox).SetText(mailbox).SetRootView(mbox).
+		OnClick(func(e events.Event) {
+			a.CurMailbox = mailbox
+			a.UpdateMessageList()
+		})
 
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox))
 	err := os.MkdirAll(string(dir), 0700)
