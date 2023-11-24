@@ -160,13 +160,13 @@ func (a *App) UpdateMessageList() {
 
 		gi.NewLabel(fr, "from").SetType(gi.LabelTitleMedium).SetText(ftxt).
 			Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
+				s.SetNonSelectable()
+				s.FillMargin = false
 			})
 		gi.NewLabel(fr, "subject").SetType(gi.LabelBodyMedium).SetText(cd.Subject).
 			Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
+				s.SetNonSelectable()
+				s.FillMargin = false
 			})
 	}
 
