@@ -36,6 +36,7 @@ func (a *App) CacheMessages() error {
 	if a.Cache == nil {
 		a.Cache = map[string]map[string][]*CacheData{}
 	}
+	fmt.Println("scm")
 	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
 	updt := mbox.UpdateStartAsync()
 	mbox.DeleteChildren(true)

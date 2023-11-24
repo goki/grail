@@ -6,6 +6,8 @@
 package grail
 
 import (
+	"fmt"
+
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -90,6 +92,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp.SetSplits(0.1, 0.2, 0.7)
 	a.UpdateEndLayout(updt)
+	fmt.Println("dcw")
 }
 
 // // UpdateReadMessage updates the view of the message currently being read.
@@ -140,9 +143,5 @@ func (a *App) GetMail() error {
 			gi.ErrorDialog(a, err, "Error caching messages").Run()
 		}
 	}()
-	updt := a.UpdateStart()
-	a.DeleteChildren(true)
-	a.Update()
-	a.UpdateEndLayout(updt)
 	return nil
 }
