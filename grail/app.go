@@ -70,6 +70,10 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sp := gi.NewSplits(a, "splits")
 
+	mbox := giv.NewTreeView(sp, "mbox")
+	mbox.RootView = mbox
+	mbox.SetText("Inbox")
+
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
@@ -85,7 +89,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	// a.UpdateReadMessage(ml, msv, mb)
 
-	sp.SetSplits(0.3, 0.7)
+	sp.SetSplits(0.1, 0.2, 0.7)
 	a.UpdateEndLayout(updt)
 }
 
