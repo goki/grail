@@ -71,8 +71,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	sp := gi.NewSplits(a, "splits")
 
 	mbox := giv.NewTreeView(sp, "mbox")
-	mbox.RootView = mbox
-	mbox.SetText("Inbox")
+	mbox.SetRootView(mbox)
 
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column

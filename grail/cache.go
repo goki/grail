@@ -16,6 +16,7 @@ import (
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-maildir"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/grows/jsons"
 )
 
@@ -35,6 +36,11 @@ func (a *App) CacheMessages() error {
 	if a.Cache == nil {
 		a.Cache = map[string]map[string][]*CacheData{}
 	}
+	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
+	updt := mbox.UpdateStartAsync()
+	mbox.DeleteChildren(true)
+	defer mbox.Update()
+	defer mbox.UpdateEndAsyncLayout(updt)
 	for _, account := range Prefs.Accounts {
 		err := a.CacheMessagesForAccount(account)
 		if err != nil {
@@ -85,6 +91,13 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	bemail := FilenameBase32(email)
 	bmbox := FilenameBase32(mailbox)
 
+	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
+	embox := mbox.ChildByName(bemail)
+	if embox == nil {
+		embox = giv.NewTreeView(mbox, bemail).SetText(email).SetRootView(mbox)
+	}
+	giv.NewTreeView(embox, bmbox).SetText(mailbox).SetRootView(mbox)
+
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox))
 	err := os.MkdirAll(string(dir), 0700)
 	if err != nil {
@@ -108,11 +121,10 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	}
 	a.Cache[email][mailbox] = cached
 
-	mbox, err := c.Select(mailbox, nil).Wait()
+	_, err = c.Select(mailbox, nil).Wait()
 	if err != nil {
 		return fmt.Errorf("opening mailbox: %w", err)
 	}
-	_ = mbox
 
 	// we want messages with UIDs not in the list we already cached
 	criteria := &imap.SearchCriteria{}
