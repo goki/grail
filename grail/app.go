@@ -70,8 +70,7 @@ func (a *App) ConfigWidget() {
 
 	sp := gi.NewSplits(a, "splits")
 
-	mbox := giv.NewTreeView(sp, "mbox").SetText("Mailboxes")
-	mbox.SetRootView(mbox)
+	giv.NewTreeView(sp, "mbox").SetText("Mailboxes")
 
 	gi.NewFrame(sp, "list").Style(func(s *styles.Style) {
 		s.Direction = styles.Column

@@ -100,13 +100,12 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
 	embox := mbox.ChildByName(bemail)
 	if embox == nil {
-		embox = giv.NewTreeView(mbox, bemail).SetText(email).SetRootView(mbox)
+		embox = giv.NewTreeView(mbox, bemail).SetText(email)
 	}
-	giv.NewTreeView(embox, bmbox).SetText(mailbox).SetRootView(mbox).
-		OnClick(func(e events.Event) {
-			a.CurMailbox = mailbox
-			a.UpdateMessageList()
-		})
+	giv.NewTreeView(embox, bmbox).SetText(mailbox).OnClick(func(e events.Event) {
+		a.CurMailbox = mailbox
+		a.UpdateMessageList()
+	})
 
 	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox))
 	err := os.MkdirAll(string(dir), 0700)
