@@ -61,7 +61,7 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	giv.NewFuncButton(tb, a.Compose).SetIcon(icons.Send)
 }
 
-func (a *App) ConfigWidget(sc *gi.Scene) {
+func (a *App) ConfigWidget() {
 	if a.HasChildren() {
 		return
 	}
