@@ -20,7 +20,7 @@ var Prefs = &Preferences{}
 // Init initializes the grail preferences. It needs to be called inside of
 // a [gimain.Run] app function.
 func Init() {
-	grr.Log0(OpenPrefs())
+	grr.Log(OpenPrefs())
 }
 
 // OpenPrefs opens [Prefs] from the default location.

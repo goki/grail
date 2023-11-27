@@ -37,7 +37,7 @@ func (a *App) SignIn() (string, error) {
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		if !slices.Contains(Prefs.Accounts, userInfo.Email) {
 			Prefs.Accounts = append(Prefs.Accounts, userInfo.Email)
-			grr.Log0(SavePrefs())
+			grr.Log(SavePrefs())
 		}
 		a.CurEmail = userInfo.Email
 		a.AuthToken[userInfo.Email] = token

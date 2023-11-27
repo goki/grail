@@ -150,7 +150,7 @@ func (a *App) UpdateMessageList() {
 		})
 		fr.OnClick(func(e events.Event) {
 			a.ReadMessage = cd
-			grr.Log0(a.UpdateReadMessage())
+			grr.Log(a.UpdateReadMessage())
 		})
 
 		ftxt := ""
@@ -239,7 +239,7 @@ func (a *App) UpdateReadMessage() error {
 
 	// we only handle the plain version if there is no HTML version
 	if !gotHTML && plain != nil {
-		err := gidom.ReadMD(gidom.BaseContext(), mb, grr.Log(io.ReadAll(plain.Body)))
+		err := gidom.ReadMD(gidom.BaseContext(), mb, grr.Log1(io.ReadAll(plain.Body)))
 		if err != nil {
 			return err
 		}

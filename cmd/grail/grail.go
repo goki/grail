@@ -22,6 +22,6 @@ func app() {
 		app.TopAppBar(b.TopAppBar(pw))
 	})
 	w := b.NewWindow().Run()
-	grr.Log0(app.GetMail())
+	grr.Log(app.GetMail())
 	w.Wait()
 }
