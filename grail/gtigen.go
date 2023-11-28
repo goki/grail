@@ -3,6 +3,7 @@
 package grail
 
 import (
+	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
@@ -22,6 +23,7 @@ var AppType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"AuthToken", &gti.Field{Name: "AuthToken", Type: "map[string]*golang.org/x/oauth2.Token", LocalType: "map[string]*oauth2.Token", Doc: "AuthToken contains the [oauth2.Token] for each account.", Directives: gti.Directives{}, Tag: ""}},
 		{"AuthClient", &gti.Field{Name: "AuthClient", Type: "map[string]github.com/emersion/go-sasl.Client", LocalType: "map[string]sasl.Client", Doc: "AuthClient contains the [sasl.Client] authentication for sending messages for each account.", Directives: gti.Directives{}, Tag: ""}},
+		{"IMAPClient", &gti.Field{Name: "IMAPClient", Type: "map[string]*github.com/emersion/go-imap/v2/imapclient.Client", LocalType: "map[string]*imapclient.Client", Doc: "IMAPCLient contains the imap clients for each account.", Directives: gti.Directives{}, Tag: ""}},
 		{"ComposeMessage", &gti.Field{Name: "ComposeMessage", Type: "*goki.dev/grail/grail.Message", LocalType: "*Message", Doc: "ComposeMessage is the current message we are editing", Directives: gti.Directives{}, Tag: ""}},
 		{"Cache", &gti.Field{Name: "Cache", Type: "map[string]map[string][]*goki.dev/grail/grail.CacheData", LocalType: "map[string]map[string][]*CacheData", Doc: "Cache contains the cache data, keyed by account and then mailbox.", Directives: gti.Directives{}, Tag: ""}},
 		{"ReadMessage", &gti.Field{Name: "ReadMessage", Type: "*goki.dev/grail/grail.CacheData", LocalType: "*CacheData", Doc: "ReadMessage is the current message we are reading", Directives: gti.Directives{}, Tag: ""}},
@@ -38,6 +40,13 @@ var AppType = gti.AddType(&gti.Type{
 		{"SendMessage", &gti.Method{Name: "SendMessage", Doc: "SendMessage sends the current message", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"MoveMessage", &gti.Method{Name: "MoveMessage", Doc: "MoveMessage moves the current message to the given mailbox.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"mailbox", &gti.Field{Name: "mailbox", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
 	}),
@@ -73,6 +82,13 @@ func (t *App) SetAuthToken(v map[string]*oauth2.Token) *App {
 // AuthClient contains the [sasl.Client] authentication for sending messages for each account.
 func (t *App) SetAuthClient(v map[string]sasl.Client) *App {
 	t.AuthClient = v
+	return t
+}
+
+// SetImapclient sets the [App.IMAPClient]:
+// IMAPCLient contains the imap clients for each account.
+func (t *App) SetImapclient(v map[string]*imapclient.Client) *App {
+	t.IMAPClient = v
 	return t
 }
 

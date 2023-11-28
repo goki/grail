@@ -6,6 +6,7 @@
 package grail
 
 import (
+	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-sasl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -24,6 +25,9 @@ type App struct {
 
 	// AuthClient contains the [sasl.Client] authentication for sending messages for each account.
 	AuthClient map[string]sasl.Client
+
+	// IMAPCLient contains the imap clients for each account.
+	IMAPClient map[string]*imapclient.Client
 
 	// ComposeMessage is the current message we are editing
 	ComposeMessage *Message

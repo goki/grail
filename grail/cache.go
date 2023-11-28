@@ -67,6 +67,8 @@ func (a *App) CacheMessagesForAccount(email string) error {
 	}
 	defer c.Logout()
 
+	a.IMAPClient[email] = c
+
 	err = c.Authenticate(a.AuthClient[email])
 	if err != nil {
 		return fmt.Errorf("authenticating: %w", err)

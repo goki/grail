@@ -25,6 +25,7 @@ import (
 	"goki.dev/glide/gidom"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
+	"goki.dev/icons"
 )
 
 // Message contains the relevant information for an email message.
@@ -152,6 +153,10 @@ func (a *App) UpdateMessageList() {
 			a.ReadMessage = cd
 			grr.Log(a.UpdateReadMessage())
 		})
+		fr.CustomContextMenu = func(m *gi.Scene) {
+			a.ReadMessage = cd
+			giv.NewFuncButton(m, a.MoveMessage).SetIcon(icons.Move).SetText("Move")
+		}
 
 		ftxt := ""
 		for _, f := range cd.From {
@@ -248,6 +253,15 @@ func (a *App) UpdateReadMessage() error {
 	mb.Update()
 	mb.UpdateEndLayout(updt)
 	return nil
+}
+
+// MoveMessage moves the current message to the given mailbox.
+func (a *App) MoveMessage(mailbox string) error { //gti:add
+	c := a.IMAPClient[a.CurEmail]
+	seqset := imap.SeqSet{}
+	seqset.AddNum(a.ReadMessage.UID)
+	_, err := c.Move(seqset, mailbox).Wait()
+	return err
 }
 
 /*
