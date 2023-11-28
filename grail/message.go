@@ -260,7 +260,11 @@ func (a *App) MoveMessage(mailbox string) error { //gti:add
 	c := a.IMAPClient[a.CurEmail]
 	seqset := imap.SeqSet{}
 	seqset.AddNum(a.ReadMessage.UID)
-	_, err := c.Move(seqset, mailbox).Wait()
+	fmt.Println(seqset)
+	mc := c.UIDMove(seqset, mailbox)
+	fmt.Println("mc", mc)
+	md, err := mc.Wait()
+	fmt.Println("md", md, err)
 	return err
 }
 
