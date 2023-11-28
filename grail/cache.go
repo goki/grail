@@ -37,19 +37,23 @@ func (a *App) CacheMessages() error {
 	if a.Cache == nil {
 		a.Cache = map[string]map[string][]*CacheData{}
 	}
+	if a.IMAPClient == nil {
+		a.IMAPClient = map[string]*imapclient.Client{}
+	}
 	mbox := a.FindPath("splits/mbox").(*giv.TreeView)
 	updt := mbox.UpdateStart()
 	mbox.DeleteChildren(true)
-	defer func() {
-		mbox.Update()
-		mbox.UpdateEndAsync(updt)
-	}()
 	for _, account := range Prefs.Accounts {
 		err := a.CacheMessagesForAccount(account)
 		if err != nil {
+			mbox.Update()
+			mbox.UpdateEndAsync(updt)
 			return fmt.Errorf("caching messages for account %q: %w", account, err)
 		}
 	}
+	// can't defer update end because it screws up the stack trace
+	mbox.Update()
+	mbox.UpdateEndAsync(updt)
 	return nil
 }
 
