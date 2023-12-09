@@ -3,24 +3,24 @@ module goki.dev/grail
 go 1.21.0
 
 require (
-	github.com/coreos/go-oidc/v3 v3.8.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/emersion/go-imap/v2 v2.0.0-alpha.7
 	github.com/emersion/go-maildir v0.3.1
 	github.com/emersion/go-message v0.17.0
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43
 	github.com/emersion/go-smtp v0.19.0
 	github.com/yuin/goldmark v1.6.0
-	goki.dev/cursors v0.0.20
-	goki.dev/gi/v2 v2.0.0-dev0.0.19
-	goki.dev/girl v0.0.24
-	goki.dev/glide v0.0.3
-	goki.dev/goosi v0.0.14
-	goki.dev/grows v0.3.19
-	goki.dev/grr v0.0.7
-	goki.dev/gti v0.1.20
-	goki.dev/icons v0.0.11
-	goki.dev/ki/v2 v2.0.0-dev0.0.22
-	goki.dev/kid v0.0.2
+	goki.dev/cursors v0.0.23
+	goki.dev/gi/v2 v2.0.0-dev0.0.20
+	goki.dev/girl v0.0.27
+	goki.dev/glide v0.0.4
+	goki.dev/goosi v0.0.17
+	goki.dev/grows v0.3.22
+	goki.dev/grr v0.0.8
+	goki.dev/gti v0.1.23
+	goki.dev/icons v0.0.12
+	goki.dev/ki/v2 v2.0.0-dev0.0.25
+	goki.dev/kid v0.0.4
 	goki.dev/ordmap v0.5.7
 	golang.org/x/oauth2 v0.15.0
 )
@@ -33,15 +33,15 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/Masterminds/vcs v1.13.3 // indirect
 	github.com/akutz/sortfold v0.2.1 // indirect
-	github.com/alecthomas/chroma/v2 v2.11.1 // indirect
+	github.com/alecthomas/chroma/v2 v2.12.0 // indirect
 	github.com/anthonynsimon/bild v0.13.0 // indirect
-	github.com/antonmedv/expr v1.15.5 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/ericchiang/css v1.3.0 // indirect
+	github.com/expr-lang/expr v1.15.6 // indirect
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
@@ -64,20 +64,20 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	github.com/yalue/merged_fs v1.2.3 // indirect
-	goki.dev/cam v0.9.38 // indirect
-	goki.dev/colors v0.8.32 // indirect
-	goki.dev/enums v0.9.42 // indirect
-	goki.dev/fi v0.1.6 // indirect
-	goki.dev/glop v0.1.6 // indirect
-	goki.dev/grog v0.0.16 // indirect
-	goki.dev/laser v0.1.22 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.17 // indirect
-	goki.dev/pi/v2 v2.0.0-dev0.0.15 // indirect
+	goki.dev/cam v0.9.41 // indirect
+	goki.dev/colors v0.8.35 // indirect
+	goki.dev/enums v0.9.46 // indirect
+	goki.dev/fi v0.1.10 // indirect
+	goki.dev/glop v0.1.7 // indirect
+	goki.dev/grog v0.0.19 // indirect
+	goki.dev/laser v0.1.25 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.20 // indirect
+	goki.dev/pi/v2 v2.0.0-dev0.0.18 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.4 // indirect
-	goki.dev/spell v0.1.4 // indirect
-	goki.dev/svg v0.1.17 // indirect
-	goki.dev/vci/v2 v2.0.0-dev0.0.20 // indirect
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.18 // indirect
+	goki.dev/spell v0.1.7 // indirect
+	goki.dev/svg v0.1.20 // indirect
+	goki.dev/vci/v2 v2.0.0-dev0.0.23 // indirect
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.21 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
