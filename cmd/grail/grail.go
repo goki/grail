@@ -14,14 +14,11 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("grail")
-	grail.Init()
-	b := gi.NewBody().SetTitle("Grail")
-	app := grail.NewApp(b, "app")
-	b.AddTopBar(func(pw gi.Widget) {
-		app.TopAppBar(b.TopAppBar(pw))
-	})
+	b := gi.NewAppBody("grail").SetTitle("Grail")
+	a := grail.NewApp(b, "app")
+	a.Init()
+	b.AddAppBar(a.AppBar)
 	w := b.NewWindow().Run()
-	grr.Log(app.GetMail())
+	grr.Log(a.GetMail())
 	w.Wait()
 }

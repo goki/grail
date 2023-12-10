@@ -37,7 +37,7 @@ func (a *App) SignIn() (string, error) {
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		if !slices.Contains(Prefs.Accounts, userInfo.Email) {
 			Prefs.Accounts = append(Prefs.Accounts, userInfo.Email)
-			grr.Log(SavePrefs())
+			grr.Log(a.SavePrefs())
 		}
 		a.CurEmail = userInfo.Email
 		a.AuthToken[userInfo.Email] = token
@@ -47,7 +47,7 @@ func (a *App) SignIn() (string, error) {
 	kid.Buttons(d, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider, email string) string {
-			return filepath.Join(gi.AppPrefsDir(), "auth", FilenameBase32(email), provider+"-token.json")
+			return filepath.Join(a.App().DataDir(), "auth", FilenameBase32(email), provider+"-token.json")
 		},
 		Accounts: Prefs.Accounts,
 		Scopes: map[string][]string{

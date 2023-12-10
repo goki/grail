@@ -60,8 +60,7 @@ func (a *App) AppStyles() {
 	})
 }
 
-func (a *App) TopAppBar(tb *gi.TopAppBar) {
-	gi.DefaultTopAppBarStd(tb)
+func (a *App) AppBar(tb *gi.Toolbar) {
 	giv.NewFuncButton(tb, a.Compose).SetIcon(icons.Send)
 }
 
@@ -140,7 +139,7 @@ func (a *App) GetMail() error {
 	go func() {
 		err = a.CacheMessages()
 		if err != nil {
-			gi.ErrorDialog(a, err, "Error caching messages").Run()
+			gi.ErrorDialog(a, err, "Error caching messages")
 		}
 	}()
 	return nil

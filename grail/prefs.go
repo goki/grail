@@ -9,7 +9,6 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/grows/jsons"
 	"goki.dev/grr"
 )
@@ -17,15 +16,14 @@ import (
 // Prefs is the global instance of [Preferences], loaded on startup.
 var Prefs = &Preferences{}
 
-// Init initializes the grail preferences. It needs to be called inside of
-// a [gimain.Run] app function.
-func Init() {
-	grr.Log(OpenPrefs())
+// Init initializes the grail preferences.
+func (a *App) Init() {
+	grr.Log(a.OpenPrefs())
 }
 
 // OpenPrefs opens [Prefs] from the default location.
-func OpenPrefs() error {
-	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
+func (a *App) OpenPrefs() error {
+	file := filepath.Join(a.App().DataDir(), "prefs.json")
 	err := jsons.Open(Prefs, file)
 	if errors.Is(err, fs.ErrNotExist) {
 		return jsons.Save(Prefs, file)
@@ -34,8 +32,8 @@ func OpenPrefs() error {
 }
 
 // SavePrefs saves [Prefs] to the default location.
-func SavePrefs() error {
-	file := filepath.Join(gi.AppPrefsDir(), "prefs.json")
+func (a *App) SavePrefs() error {
+	file := filepath.Join(a.App().DataDir(), "prefs.json")
 	return jsons.Save(Prefs, file)
 }
 

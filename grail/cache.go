@@ -15,7 +15,6 @@ import (
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-maildir"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
@@ -113,7 +112,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		a.UpdateMessageList()
 	})
 
-	dir := maildir.Dir(filepath.Join(gi.AppPrefsDir(), "mail", bemail, bmbox))
+	dir := maildir.Dir(filepath.Join(a.App().DataDir(), "mail", bemail, bmbox))
 	err := os.MkdirAll(string(dir), 0700)
 	if err != nil {
 		return err
@@ -123,7 +122,7 @@ func (a *App) CacheMessagesForMailbox(c *imapclient.Client, email string, mailbo
 		return fmt.Errorf("initializing maildir: %w", err)
 	}
 
-	cachedFile := filepath.Join(gi.AppPrefsDir(), "caching", bemail, bmbox, "cached-messages.json")
+	cachedFile := filepath.Join(a.App().DataDir(), "caching", bemail, bmbox, "cached-messages.json")
 	err = os.MkdirAll(filepath.Dir(cachedFile), 0700)
 	if err != nil {
 		return err
