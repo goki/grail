@@ -1,8 +1,6 @@
 module goki.dev/grail
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/coreos/go-oidc/v3 v3.9.0
