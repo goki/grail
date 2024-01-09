@@ -6,14 +6,11 @@ package main
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/grail/grail"
 	"goki.dev/grr"
 )
 
-func main() { gimain.Run(app) }
-
-func app() {
+func main() {
 	b := gi.NewAppBody("grail").SetTitle("Grail")
 	a := grail.NewApp(b, "app")
 	a.Init()
